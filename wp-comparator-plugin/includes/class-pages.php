@@ -378,12 +378,12 @@ class WP_Comparator_Pages {
      * Configurer les hooks SEO AVANT l'affichage
      */
     private function setup_seo_hooks() {
-        $type_slug = get_query_var('type_slug');
+        $url_prefix = get_query_var('url_prefix');
         $item1_slug = get_query_var('item1_slug');
         $item2_slug = get_query_var('item2_slug');
         
         // Nettoyer les slugs
-        $type_slug = sanitize_title($type_slug);
+        $url_prefix = sanitize_title($url_prefix);
         $item1_slug = sanitize_title($item1_slug);
         $item2_slug = sanitize_title($item2_slug);
         
@@ -394,8 +394,8 @@ class WP_Comparator_Pages {
         $table_items = $wpdb->prefix . 'comparator_items';
         
         $type = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_types WHERE slug = %s",
-            $type_slug
+            "SELECT * FROM $table_types WHERE url_prefix = %s OR CONCAT('comparez-', slug) = %s",
+            $url_prefix, $url_prefix
         ));
         
         if (!$type) return;

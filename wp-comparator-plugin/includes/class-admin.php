@@ -458,6 +458,7 @@ class WP_Comparator_Admin {
         $name = sanitize_text_field($_POST['name']);
         $slug = !empty($_POST['slug']) ? $this->generate_slug($_POST['slug']) : $this->generate_slug($name);
         $description = sanitize_textarea_field($_POST['description']);
+        $url_prefix = sanitize_text_field($_POST['url_prefix']);
         $intro_text = sanitize_textarea_field($_POST['intro_text']);
         $custom_title = sanitize_textarea_field($_POST['custom_title']);
         $meta_title = sanitize_textarea_field($_POST['meta_title']);
@@ -486,6 +487,7 @@ class WP_Comparator_Admin {
             'name' => $name,
             'slug' => $slug,
             'description' => $description,
+            'url_prefix' => $url_prefix,
             'intro_text' => $intro_text,
             'custom_title' => $custom_title,
             'meta_title' => $meta_title,
@@ -508,6 +510,7 @@ class WP_Comparator_Admin {
         $name = sanitize_text_field($_POST['name']);
         $slug = !empty($_POST['slug']) ? $this->generate_slug($_POST['slug']) : $this->generate_slug($name);
         $description = sanitize_textarea_field($_POST['description']);
+        $url_prefix = sanitize_text_field($_POST['url_prefix']);
         $intro_text = sanitize_textarea_field($_POST['intro_text']);
         $custom_title = sanitize_textarea_field($_POST['custom_title']);
         $meta_title = sanitize_textarea_field($_POST['meta_title']);
@@ -538,13 +541,14 @@ class WP_Comparator_Admin {
                 'name' => $name,
                 'slug' => $slug,
                 'description' => $description,
+                'url_prefix' => $url_prefix,
                 'intro_text' => $intro_text,
                 'custom_title' => $custom_title,
                 'meta_title' => $meta_title,
                 'meta_description' => $meta_description
             ),
             array('id' => $type_id),
-            array('%s', '%s', '%s', '%s', '%s', '%s', '%s'),
+            array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'),
             array('%d')
         );
         

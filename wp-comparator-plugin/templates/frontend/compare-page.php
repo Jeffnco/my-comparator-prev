@@ -1,28 +1,22 @@
 <div class="wp-comparator-compare-page">
     <div class="container">
-        <header class="comparison-header">
-            <h1 class="comparison-title">
-                Comparaison : <?php echo esc_html($item1->name); ?> vs <?php echo esc_html($item2->name); ?>
-            </h1>
-            
-            <?php if (!empty($type->intro_text)): ?>
-                <div class="comparison-intro">
-                    <?php 
-                    $intro_text = str_replace(
-                        array('{contrat1}', '{assureur1}', '{contrat2}', '{assureur2}'),
-                        array(
-                            stripslashes($item1->contrat ?: $item1->name),
-                            stripslashes($item1->assureur ?: 'N/A'),
-                            stripslashes($item2->contrat ?: $item2->name),
-                            stripslashes($item2->assureur ?: 'N/A')
-                        ),
-                        stripslashes($type->intro_text)
-                    );
-                    echo wp_kses_post($intro_text);
-                    ?>
-                </div>
-            <?php endif; ?>
-        </header>
+        <?php if (!empty($type->intro_text)): ?>
+            <div class="comparison-intro">
+                <?php 
+                $intro_text = str_replace(
+                    array('{contrat1}', '{assureur1}', '{contrat2}', '{assureur2}'),
+                    array(
+                        stripslashes($item1->contrat ?: $item1->name),
+                        stripslashes($item1->assureur ?: 'N/A'),
+                        stripslashes($item2->contrat ?: $item2->name),
+                        stripslashes($item2->assureur ?: 'N/A')
+                    ),
+                    stripslashes($type->intro_text)
+                );
+                echo wp_kses_post($intro_text);
+                ?>
+            </div>
+        <?php endif; ?>
         
         <!-- Informations générales des contrats -->
         <div class="contracts-overview">

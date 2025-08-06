@@ -552,11 +552,11 @@ class WP_Comparator_Admin {
         $field_type = sanitize_text_field($_POST['field_type']);
         $parent_category_id = ($field_type === 'description' && !empty($_POST['parent_category_id'])) ? intval($_POST['parent_category_id']) : null;
         $has_info_button = isset($_POST['has_info_button']) ? intval($_POST['has_info_button']) : 0;
-        $info_content = sanitize_textarea_field($_POST['info_content']);
-        $short_description = sanitize_textarea_field($_POST['short_description']);
-        $long_description = sanitize_textarea_field($_POST['long_description']);
+        $info_content = isset($_POST['info_content']) ? sanitize_textarea_field($_POST['info_content']) : '';
+        $short_description = isset($_POST['short_description']) ? sanitize_textarea_field($_POST['short_description']) : '';
+        $long_description = isset($_POST['long_description']) ? sanitize_textarea_field($_POST['long_description']) : '';
         $is_filterable = isset($_POST['is_filterable']) ? 1 : 0;
-        $filter_name = sanitize_text_field($_POST['filter_name']);
+        $filter_name = isset($_POST['filter_name']) ? sanitize_text_field($_POST['filter_name']) : '';
         $filter_options = '';
         
         // Traiter les options de filtre
@@ -565,7 +565,7 @@ class WP_Comparator_Admin {
             $filter_options = implode(',', $options);
         }
         
-        $sort_order = intval($_POST['sort_order']);
+        $sort_order = isset($_POST['sort_order']) ? intval($_POST['sort_order']) : 0;
         
         $result = $wpdb->insert($table_fields, array(
             'type_id' => $type_id,
@@ -599,11 +599,11 @@ class WP_Comparator_Admin {
         $field_type = sanitize_text_field($_POST['field_type']);
         $parent_category_id = ($field_type === 'description' && !empty($_POST['parent_category_id'])) ? intval($_POST['parent_category_id']) : null;
         $has_info_button = isset($_POST['has_info_button']) ? intval($_POST['has_info_button']) : 0;
-        $info_content = sanitize_textarea_field(stripslashes($_POST['info_content']));
-        $short_description = sanitize_textarea_field(stripslashes($_POST['short_description']));
-        $long_description = sanitize_textarea_field(stripslashes($_POST['long_description']));
+        $info_content = isset($_POST['info_content']) ? sanitize_textarea_field(stripslashes($_POST['info_content'])) : '';
+        $short_description = isset($_POST['short_description']) ? sanitize_textarea_field(stripslashes($_POST['short_description'])) : '';
+        $long_description = isset($_POST['long_description']) ? sanitize_textarea_field(stripslashes($_POST['long_description'])) : '';
         $is_filterable = isset($_POST['is_filterable']) ? 1 : 0;
-        $filter_name = sanitize_text_field(stripslashes($_POST['filter_name']));
+        $filter_name = isset($_POST['filter_name']) ? sanitize_text_field(stripslashes($_POST['filter_name'])) : '';
         $filter_options = '';
         
         // Traiter les options de filtre
@@ -614,7 +614,7 @@ class WP_Comparator_Admin {
             $filter_options = implode(',', $options);
         }
         
-        $sort_order = intval($_POST['sort_order']);
+        $sort_order = isset($_POST['sort_order']) ? intval($_POST['sort_order']) : 0;
         
         $result = $wpdb->update(
             $table_fields,

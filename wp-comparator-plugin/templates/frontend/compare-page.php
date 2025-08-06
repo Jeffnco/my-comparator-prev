@@ -1,9 +1,32 @@
 <?php
 // Les meta tags SEO sont maintenant gérés dans class-pages.php AVANT l'affichage
+
+// Générer le texte d'introduction si défini
+$intro_text = '';
+if (!empty($type->intro_text)) {
+    $intro_text = str_replace(
+        array('{contrat1}', '{assureur1}', '{contrat2}', '{assureur2}'),
+        array(
+            stripslashes($item1->contrat ?: $item1->name),
+            stripslashes($item1->assureur ?: 'N/A'),
+            stripslashes($item2->contrat ?: $item2->name),
+            stripslashes($item2->assureur ?: 'N/A')
+        ),
+        stripslashes($type->intro_text)
+    );
+}
 ?>
 
 <div class="wp-comparator-compare-page">
     <div class="container">
+        <?php if ($intro_text): ?>
+            <div class="comparison-header">
+                <div class="comparison-intro">
+                    <?php echo wp_kses_post(nl2br($intro_text)); ?>
+                </div>
+            </div>
+        <?php endif; ?>
+        
         <!-- Informations générales des contrats -->
         <div class="contracts-overview">
             <div class="contract-card">

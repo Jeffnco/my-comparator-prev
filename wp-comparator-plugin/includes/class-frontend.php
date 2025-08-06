@@ -127,6 +127,9 @@ class WP_Comparator_Frontend {
             'items' => ''
         ), $atts);
         
+        // Debug console
+        echo '<script>console.log("DEBUG SHORTCODE:", ' . json_encode($atts) . ');</script>';
+        
         // DEBUG: Afficher les informations de debug
         echo '<div style="background: #ff0000; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace;">';
         echo '<strong>🔍 DEBUG SHORTCODE COMPARE:</strong><br>';
@@ -152,6 +155,9 @@ class WP_Comparator_Frontend {
         
         $table_types = $wpdb->prefix . 'comparator_types';
         $table_items = $wpdb->prefix . 'comparator_items';
+        
+        // Debug console - table name
+        echo '<script>console.log("DEBUG TABLE:", "' . $table_types . '");</script>';
         
         // DEBUG: Afficher la requête SQL
         echo '<div style="background: #0066cc; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace;">';
@@ -235,6 +241,10 @@ class WP_Comparator_Frontend {
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
         ));
+        
+        // Debug console - résultat
+        echo '<script>console.log("DEBUG TYPE RESULT:", ' . json_encode($type) . ');</script>';
+        echo '<script>console.log("DEBUG WPDB ERROR:", "' . $wpdb->last_error . '");</script>';
         
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';

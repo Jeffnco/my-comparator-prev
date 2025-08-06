@@ -127,6 +127,14 @@ class WP_Comparator_Frontend {
             'items' => ''
         ), $atts);
         
+        // DEBUG: Afficher le slug recherché
+        echo '<div style="background: red; color: white; padding: 10px; margin: 10px 0; border-radius: 5px;">';
+        echo '<strong>DEBUG:</strong><br>';
+        echo 'Slug recherché: "' . $atts['type'] . '"<br>';
+        echo 'Slug en BDD: "assurance-prevoyance"<br>';
+        echo 'Match: ' . ($atts['type'] === 'assurance-prevoyance' ? 'OUI' : 'NON');
+        echo '</div>';
+        
         if (empty($atts['type']) || empty($atts['items'])) {
             return '<p>Erreur: Paramètres manquants pour la comparaison.</p>';
         }

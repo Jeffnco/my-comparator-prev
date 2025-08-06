@@ -154,8 +154,6 @@ class WP_Comparator_Pages {
         if (!empty($meta_title)) {
             // Yoast SEO
             $meta_input['_yoast_wpseo_title'] = $meta_title;
-            // All in One SEO
-            $meta_input['_aioseo_title'] = $meta_title;
             // RankMath
             $meta_input['rank_math_title'] = $meta_title;
         }
@@ -163,8 +161,6 @@ class WP_Comparator_Pages {
         if (!empty($meta_description)) {
             // Yoast SEO
             $meta_input['_yoast_wpseo_metadesc'] = $meta_description;
-            // All in One SEO
-            $meta_input['_aioseo_description'] = $meta_description;
             // RankMath
             $meta_input['rank_math_description'] = $meta_description;
         }
@@ -188,8 +184,17 @@ class WP_Comparator_Pages {
         if ($page_id && !is_wp_error($page_id)) {
             $this->debug_log("Page créée avec succès - ID: $page_id");
             
+            // DEBUG: Vérifier les valeurs avant AIOSEO
+            $this->debug_log("AVANT AIOSEO - Meta title: '$meta_title'");
+            $this->debug_log("AVANT AIOSEO - Meta description: '$meta_description'");
+            
             // Gérer AIOSEO séparément car il utilise un format spécial
-            $this->handle_aioseo_meta($page_id, $meta_title, $meta_description);
+            if (!empty($meta_title) || !empty($meta_description)) {
+                $this->debug_log("Appel handle_aioseo_meta...");
+                $this->handle_aioseo_meta($page_id, $meta_title, $meta_description);
+            } else {
+                $this->debug_log("ERREUR: Meta title/description vides pour AIOSEO !");
+            }
             
             // Debug des meta SEO stockés
             if (!empty($meta_title)) {
@@ -213,19 +218,31 @@ class WP_Comparator_Pages {
      * Gérer les meta SEO pour AIOSEO (format spécial)
      */
     private function handle_aioseo_meta($page_id, $meta_title, $meta_description) {
+        $this->debug_log("=== DÉBUT handle_aioseo_meta ===");
+        $this->debug_log("Page ID: $page_id");
+        $this->debug_log("Meta title reçu: '$meta_title'");
+        $this->debug_log("Meta description reçue: '$meta_description'");
+        
         // Vérifier si AIOSEO est actif
         if (!$this->is_aioseo_active()) {
+            $this->debug_log("AIOSEO non actif - abandon");
             return;
         }
         
+        $this->debug_log("AIOSEO détecté comme actif");
+        
         // Détecter la version d'AIOSEO
         if ($this->is_aioseo_v4_or_higher()) {
+            $this->debug_log("AIOSEO v4+ détecté");
             // AIOSEO v4+ utilise '_aioseo_posts_settings'
             $this->set_aioseo_v4_meta($page_id, $meta_title, $meta_description);
         } else {
+            $this->debug_log("AIOSEO v3 détecté");
             // AIOSEO v3 utilise '_aioseop_*'
             $this->set_aioseo_v3_meta($page_id, $meta_title, $meta_description);
         }
+        
+        $this->debug_log("=== FIN handle_aioseo_meta ===");
     }
     
     /**
@@ -262,6 +279,9 @@ class WP_Comparator_Pages {
      * Définir les meta pour AIOSEO v4+
      */
     private function set_aioseo_v4_meta($page_id, $meta_title, $meta_description) {
+        $this->debug_log("=== DÉBUT set_aioseo_v4_meta ===");
+        $this->debug_log("Tentative stockage v4 - Title: '$meta_title', Desc: '$meta_description'");
+        
         // Récupérer les settings existants
         $settings = get_post_meta($page_id, '_aioseo_posts_settings', true);
         
@@ -269,6 +289,8 @@ class WP_Comparator_Pages {
         if (!is_array($settings)) {
             $settings = array();
         }
+        
+        $this->debug_log("Settings existants: " . print_r($settings, true));
         
         // Ajouter nos meta
         if (!empty($meta_title)) {
@@ -279,25 +301,37 @@ class WP_Comparator_Pages {
             $settings['description'] = $meta_description;
         }
         
-        // Sauvegarder
-        update_post_meta($page_id, '_aioseo_posts_settings', $settings);
+        $this->debug_log("Settings après modification: " . print_r($settings, true));
         
-        $this->debug_log("AIOSEO v4+ meta stockés: " . print_r($settings, true));
+        // Sauvegarder
+        $result = update_post_meta($page_id, '_aioseo_posts_settings', $settings);
+        
+        $this->debug_log("Résultat update_post_meta: " . ($result ? 'SUCCESS' : 'FAILED'));
+        
+        // Vérification immédiate
+        $verification = get_post_meta($page_id, '_aioseo_posts_settings', true);
+        $this->debug_log("Vérification immédiate: " . print_r($verification, true));
+        
+        $this->debug_log("=== FIN set_aioseo_v4_meta ===");
     }
     
     /**
      * Définir les meta pour AIOSEO v3
      */
     private function set_aioseo_v3_meta($page_id, $meta_title, $meta_description) {
+        $this->debug_log("=== DÉBUT set_aioseo_v3_meta ===");
+        
         if (!empty($meta_title)) {
-            update_post_meta($page_id, '_aioseop_title', $meta_title);
+            $result1 = update_post_meta($page_id, '_aioseop_title', $meta_title);
+            $this->debug_log("AIOSEO v3 title stocké: '$meta_title' - Résultat: " . ($result1 ? 'SUCCESS' : 'FAILED'));
         }
         
         if (!empty($meta_description)) {
-            update_post_meta($page_id, '_aioseop_description', $meta_description);
+            $result2 = update_post_meta($page_id, '_aioseop_description', $meta_description);
+            $this->debug_log("AIOSEO v3 description stockée: '$meta_description' - Résultat: " . ($result2 ? 'SUCCESS' : 'FAILED'));
         }
         
-        $this->debug_log("AIOSEO v3 meta stockés - Title: $meta_title, Description: $meta_description");
+        $this->debug_log("=== FIN set_aioseo_v3_meta ===");
     }
     
     /**

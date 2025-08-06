@@ -159,12 +159,18 @@ class WP_Comparator_Frontend {
      * Usage: [wp_comparator_compare type="assurance-prevoyance" items="aviva-senseo,april-prevoyance"]
      */
     public function shortcode_comparator_compare($atts) {
+        // DEBUG: Vérifier que le shortcode s'exécute
+        echo '<div style="background: #ff0000; color: white; padding: 10px; margin: 10px 0; font-weight: bold;">🚨 DEBUG: Le shortcode s\'exécute !</div>';
+        
         $atts = shortcode_atts(array(
             'type' => '',
             'items' => ''
         ), $atts);
         
+        echo '<div style="background: #0000ff; color: white; padding: 10px; margin: 10px 0;">📝 DEBUG: Paramètres reçus - type: "' . $atts['type'] . '", items: "' . $atts['items'] . '"</div>';
+        
         if (empty($atts['type']) || empty($atts['items'])) {
+            echo '<div style="background: #ff8800; color: white; padding: 10px; margin: 10px 0;">⚠️ DEBUG: Paramètres manquants !</div>';
             return '<p>Erreur: Les paramètres "type" et "items" sont requis.</p>';
         }
         

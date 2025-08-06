@@ -403,7 +403,7 @@ class WP_Comparator_Admin {
                                                     <select name="field_<?php echo $field->id; ?>_filter" class="regular-text">
                                                         <option value="">-- Choisir une option --</option>
                                                         <?php foreach ($filter_options as $option): ?>
-                                                            <option value="<?php echo esc_attr($option); ?>" <?php selected($current_filter_value, $option); ?>>
+                                                            <option value="<?php echo esc_attr($option); ?>" <?php selected(isset($current_filter_value) ? $current_filter_value : '', $option); ?>>
                                                                 <?php echo esc_html($option); ?>
                                                             </option>
                                                         <?php endforeach; ?>
@@ -418,7 +418,7 @@ class WP_Comparator_Admin {
                                                 <label for="field_<?php echo $field->id; ?>" style="font-weight: bold; display: block; margin-bottom: 5px;">
                                                     Description courte :
                                                 </label>
-                                                <textarea id="field_<?php echo $field->id; ?>" name="field_<?php echo $field->id; ?>" rows="3" class="large-text"><?php echo esc_textarea($current_value); ?></textarea>
+                                                <textarea id="field_<?php echo $field->id; ?>" name="field_<?php echo $field->id; ?>" rows="3" class="large-text"><?php echo esc_textarea(isset($current_value) ? $current_value : ''); ?></textarea>
                                                 <p class="description">Texte qui s'affichera directement dans le comparateur</p>
                                             </div>
                                             
@@ -426,7 +426,7 @@ class WP_Comparator_Admin {
                                                 <label for="long_desc_<?php echo $field->id; ?>" style="font-weight: bold; display: block; margin-bottom: 5px;">
                                                     Description longue (optionnelle) :
                                                 </label>
-                                                <textarea id="long_desc_<?php echo $field->id; ?>" name="long_desc_<?php echo $field->id; ?>" rows="4" class="large-text" placeholder="Description détaillée qui s'affichera avec le bouton 'En savoir plus'..."><?php echo esc_textarea($current_long_desc); ?></textarea>
+                                                <textarea id="long_desc_<?php echo $field->id; ?>" name="long_desc_<?php echo $field->id; ?>" rows="4" class="large-text" placeholder="Description détaillée qui s'affichera avec le bouton 'En savoir plus'..."><?php echo esc_textarea(isset($current_long_desc) ? $current_long_desc : ''); ?></textarea>
                                             </div>
                                             
                                             <?php if ($field->long_description): ?>

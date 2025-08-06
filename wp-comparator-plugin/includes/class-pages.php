@@ -109,7 +109,8 @@ class WP_Comparator_Pages {
         
         // Générer le titre et le slug de la page
         $page_title = $this->generate_page_title($type, $item1, $item2);
-        $page_slug = "comparez-{$type_slug}-{$item1_slug}-et-{$item2_slug}";
+        $url_prefix = !empty($type->url_prefix) ? $type->url_prefix : "comparez-{$type_slug}";
+        $page_slug = "{$url_prefix}-{$item1_slug}-et-{$item2_slug}";
         
         // Vérifier si la page existe déjà
         $existing_page = get_page_by_path($page_slug);

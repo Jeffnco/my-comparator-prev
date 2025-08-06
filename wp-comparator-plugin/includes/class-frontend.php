@@ -74,6 +74,39 @@ class WP_Comparator_Frontend {
             $atts['type']
         ));
         
+        // Debug info - AFFICHAGE DIRECT
+        $debug_info = "<div style='background: #f0f0f0; border: 2px solid #ff0000; padding: 15px; margin: 10px 0; font-family: monospace;'>";
+        $debug_info .= "<h3 style='color: #ff0000;'>🔍 DEBUG WP COMPARATOR</h3>";
+        $debug_info .= "<p><strong>Table name:</strong> " . $table_types . "</p>";
+        $debug_info .= "<p><strong>Slug recherché:</strong> " . $atts['type'] . "</p>";
+        $debug_info .= "<p><strong>Dernière erreur SQL:</strong> " . ($wpdb->last_error ?: 'Aucune') . "</p>";
+        
+        // Vérifier si la table existe
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_types'") == $table_types;
+        $debug_info .= "<p><strong>Table existe:</strong> " . ($table_exists ? '✅ OUI' : '❌ NON') . "</p>";
+        
+        if ($table_exists) {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM $table_types");
+            $debug_info .= "<p><strong>Nombre de types en BDD:</strong> " . $count . "</p>";
+            
+            // Lister tous les types
+            $all_types = $wpdb->get_results("SELECT id, name, slug FROM $table_types");
+            $debug_info .= "<p><strong>Tous les types en BDD:</strong></p><ul>";
+            foreach ($all_types as $t) {
+                $debug_info .= "<li>ID: {$t->id}, Name: {$t->name}, Slug: '{$t->slug}'</li>";
+            }
+            $debug_info .= "</ul>";
+        }
+        
+        $debug_info .= "<p><strong>Type trouvé:</strong> " . ($type ? '✅ OUI' : '❌ NON') . "</p>";
+        if ($type) {
+            $debug_info .= "<p><strong>Détails du type:</strong> ID: {$type->id}, Name: {$type->name}, Slug: '{$type->slug}'</p>";
+        }
+        $debug_info .= "</div>";
+        
+        // Afficher le debug (temporaire)
+        echo $debug_info;
+        
         // Debug info - À SUPPRIMER APRÈS DIAGNOSTIC
         error_log("=== DEBUG WP COMPARATOR ===");
         error_log("Table name: " . $table_types);

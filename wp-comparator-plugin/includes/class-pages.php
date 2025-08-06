@@ -25,8 +25,9 @@ class WP_Comparator_Pages {
      * Ajouter les règles de réécriture d'URL
      */
     public function add_rewrite_rules() {
+        // Règle flexible qui fonctionne avec ou sans .html à la fin
         add_rewrite_rule(
-            'comparez-([^/]+)-([^/]+)-et-([^/]+)\.html$',
+            'comparez-([^/]+)-([^/]+)-et-([^/]+?)(?:\.html)?/?$',
             'index.php?wp_comparator_compare=1&type_slug=$matches[1]&item1_slug=$matches[2]&item2_slug=$matches[3]',
             'top'
         );

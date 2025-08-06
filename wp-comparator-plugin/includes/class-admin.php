@@ -370,7 +370,7 @@ class WP_Comparator_Admin {
                                     $current_filter_value = '';
                                     if ($field->is_filterable) {
                                         $current_filter_value = $wpdb->get_var($wpdb->prepare(
-                                            "SELECT value FROM $table_values WHERE item_id = %d AND field_id = %d",
+                                            "SELECT filter_value FROM $table_item_filters WHERE item_id = %d AND field_id = %d",
                                             $item_id, $field->id
                                         ));
                                     }

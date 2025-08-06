@@ -117,7 +117,7 @@ class WP_Comparator_Frontend {
             if (!empty($filterable_fields)) {
                 foreach ($filterable_fields as $field) {
                     $filter_value = $wpdb->get_var($wpdb->prepare(
-                        "SELECT filter_value FROM $table_item_filters WHERE item_id = %d AND field_id = %d",
+                        "SELECT filter_value FROM {$wpdb->prefix}comparator_item_filters WHERE item_id = %d AND field_id = %d",
                         $item->id, $field->id
                     ));
                     $item->filter_values[$field->id] = $filter_value;

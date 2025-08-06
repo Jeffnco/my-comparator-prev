@@ -37,6 +37,12 @@
                     <?php if ($item1->contrat): ?>
                         <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($item1->contrat)); ?></p>
                     <?php endif; ?>
+                    <?php if ($item1->description): ?>
+                        <div class="contract-description">
+                            <strong>Description :</strong>
+                            <p><?php echo wp_kses_post(nl2br(stripslashes($item1->description))); ?></p>
+                        </div>
+                    <?php endif; ?>
                     <?php if ($item1->assureur): ?>
                         <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($item1->assureur)); ?></p>
                     <?php endif; ?>
@@ -71,6 +77,12 @@
                 <div class="contract-info">
                     <?php if ($item2->contrat): ?>
                         <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($item2->contrat)); ?></p>
+                    <?php endif; ?>
+                    <?php if ($item2->description): ?>
+                        <div class="contract-description">
+                            <strong>Description :</strong>
+                            <p><?php echo wp_kses_post(nl2br(stripslashes($item2->description))); ?></p>
+                        </div>
                     <?php endif; ?>
                     <?php if ($item2->assureur): ?>
                         <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($item2->assureur)); ?></p>
@@ -290,6 +302,30 @@
     margin: 8px 0;
     color: #666;
     line-height: 1.5;
+}
+
+.contract-description {
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-left: 4px solid #0073aa;
+    border-radius: 4px;
+}
+
+.contract-description strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #0073aa;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.contract-description p {
+    margin: 0;
+    color: #555;
+    line-height: 1.6;
+    font-size: 14px;
 }
 
 .contract-actions {

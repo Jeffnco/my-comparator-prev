@@ -1,6 +1,5 @@
 <?php
-// Générer les meta tags personnalisés et les appliquer via les hooks des plugins SEO
-wp_comparator_set_seo_meta($type, $item1, $item2);
+// Les meta tags SEO sont maintenant gérés dans class-pages.php AVANT l'affichage
 ?>
 
 <div class="wp-comparator-compare-page">

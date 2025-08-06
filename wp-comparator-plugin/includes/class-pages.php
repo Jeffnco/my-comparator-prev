@@ -61,6 +61,9 @@ class WP_Comparator_Pages {
             $this->debug_log('Item1 slug: ' . get_query_var('item1_slug'));
             $this->debug_log('Item2 slug: ' . get_query_var('item2_slug'));
             
+            // IMPORTANT: Ajouter les hooks SEO AVANT l'affichage
+            $this->setup_seo_hooks();
+            
             $this->display_comparison_page();
             exit;
         }
@@ -351,6 +354,48 @@ class WP_Comparator_Pages {
         }
         
         return $data;
+    }
+    
+    /**
+     * Configurer les hooks SEO AVANT l'affichage
+     */
+    private function setup_seo_hooks() {
+        $type_slug = get_query_var('type_slug');
+        $item1_slug = get_query_var('item1_slug');
+        $item2_slug = get_query_var('item2_slug');
+        
+        // Nettoyer les slugs
+        $type_slug = sanitize_title($type_slug);
+        $item1_slug = sanitize_title($item1_slug);
+        $item2_slug = sanitize_title($item2_slug);
+        
+        global $wpdb;
+        
+        // Récupérer les données
+        $table_types = $wpdb->prefix . 'comparator_types';
+        $table_items = $wpdb->prefix . 'comparator_items';
+        
+        $type = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_types WHERE slug = %s",
+            $type_slug
+        ));
+        
+        if (!$type) return;
+        
+        $item1 = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
+            $item1_slug, $type->id
+        ));
+        
+        $item2 = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
+            $item2_slug, $type->id
+        ));
+        
+        if (!$item1 || !$item2) return;
+        
+        // Appliquer les meta tags SEO MAINTENANT
+        wp_comparator_set_seo_meta($type, $item1, $item2);
     }
     
     /**

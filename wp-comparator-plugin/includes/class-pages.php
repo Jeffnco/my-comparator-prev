@@ -214,10 +214,15 @@ class WP_Comparator_Pages {
      * Vérification finale de ce qui est stocké
      */
     private function debug_final_check($page_id) {
-        $this->debug_log("=== VÉRIFICATION FINALE PAGE $page_id ===");
+        // Afficher le debug directement sur la page temporairement
+        echo "<div style='background: #f0f0f0; padding: 20px; margin: 20px; border: 2px solid #333; font-family: monospace;'>";
+        echo "<h3>🔍 DEBUG AIOSEO - Page ID: $page_id</h3>";
         
         // Vérifier tous les meta de la page
         $all_meta = get_post_meta($page_id);
+        
+        echo "<h4>📋 TOUS LES META DE LA PAGE :</h4>";
+        echo "<pre>" . print_r($all_meta, true) . "</pre>";
         
         // Chercher les meta SEO
         $seo_meta = array();
@@ -230,46 +235,74 @@ class WP_Comparator_Pages {
             }
         }
         
-        $this->debug_log("Meta SEO trouvés: " . print_r($seo_meta, true));
+        echo "<h4>🎯 META SEO TROUVÉS :</h4>";
+        if (!empty($seo_meta)) {
+            echo "<pre>" . print_r($seo_meta, true) . "</pre>";
+        } else {
+            echo "<p style='color: red; font-weight: bold;'>❌ AUCUN META SEO TROUVÉ !</p>";
+        }
         
         // Test spécifique AIOSEO
         $aioseo_settings = get_post_meta($page_id, '_aioseo_posts_settings', true);
-        $this->debug_log("AIOSEO settings: " . print_r($aioseo_settings, true));
+        echo "<h4>🔧 AIOSEO V4+ SETTINGS :</h4>";
+        if ($aioseo_settings) {
+            echo "<pre>" . print_r($aioseo_settings, true) . "</pre>";
+        } else {
+            echo "<p style='color: orange;'>⚠️ Pas de settings AIOSEO v4+</p>";
+        }
         
         $aioseop_title = get_post_meta($page_id, '_aioseop_title', true);
         $aioseop_desc = get_post_meta($page_id, '_aioseop_description', true);
-        $this->debug_log("AIOSEO v3 - Title: '$aioseop_title', Desc: '$aioseop_desc'");
+        echo "<h4>🔧 AIOSEO V3 SETTINGS :</h4>";
+        echo "<p><strong>Title:</strong> " . ($aioseop_title ? $aioseop_title : "❌ Vide") . "</p>";
+        echo "<p><strong>Description:</strong> " . ($aioseop_desc ? $aioseop_desc : "❌ Vide") . "</p>";
+        
+        // Vérifier la version d'AIOSEO
+        echo "<h4>🔍 DÉTECTION AIOSEO :</h4>";
+        echo "<p><strong>AIOSEO actif:</strong> " . ($this->is_aioseo_active() ? "✅ OUI" : "❌ NON") . "</p>";
+        echo "<p><strong>Version v4+:</strong> " . ($this->is_aioseo_v4_or_higher() ? "✅ OUI" : "❌ NON") . "</p>";
+        
+        if (defined('AIOSEO_VERSION')) {
+            echo "<p><strong>Version AIOSEO:</strong> " . AIOSEO_VERSION . "</p>";
+        } else {
+            echo "<p><strong>Version AIOSEO:</strong> ❌ Constante non définie</p>";
+        }
+        
+        echo "</div>";
     }
     
     /**
      * Gérer les meta SEO pour AIOSEO (format spécial)
      */
     private function handle_aioseo_meta($page_id, $meta_title, $meta_description) {
-        $this->debug_log("=== DÉBUT handle_aioseo_meta ===");
-        $this->debug_log("Page ID: $page_id");
-        $this->debug_log("Meta title reçu: '$meta_title'");
-        $this->debug_log("Meta description reçue: '$meta_description'");
+        // Debug visible sur la page
+        echo "<div style='background: #e8f4f8; padding: 15px; margin: 10px; border-left: 4px solid #0073aa;'>";
+        echo "<h4>🔧 TRAITEMENT AIOSEO</h4>";
+        echo "<p><strong>Page ID:</strong> $page_id</p>";
+        echo "<p><strong>Meta title reçu:</strong> '$meta_title'</p>";
+        echo "<p><strong>Meta description reçue:</strong> '$meta_description'</p>";
         
         // Vérifier si AIOSEO est actif
         if (!$this->is_aioseo_active()) {
-            $this->debug_log("AIOSEO non actif - abandon");
+            echo "<p style='color: red;'>❌ AIOSEO non actif - abandon</p>";
+            echo "</div>";
             return;
         }
         
-        $this->debug_log("AIOSEO détecté comme actif");
+        echo "<p style='color: green;'>✅ AIOSEO détecté comme actif</p>";
         
         // Détecter la version d'AIOSEO
         if ($this->is_aioseo_v4_or_higher()) {
-            $this->debug_log("AIOSEO v4+ détecté");
+            echo "<p>🔧 AIOSEO v4+ détecté - utilisation format tableau</p>";
             // AIOSEO v4+ utilise '_aioseo_posts_settings'
             $this->set_aioseo_v4_meta($page_id, $meta_title, $meta_description);
         } else {
-            $this->debug_log("AIOSEO v3 détecté");
+            echo "<p>🔧 AIOSEO v3 détecté - utilisation champs séparés</p>";
             // AIOSEO v3 utilise '_aioseop_*'
             $this->set_aioseo_v3_meta($page_id, $meta_title, $meta_description);
         }
         
-        $this->debug_log("=== FIN handle_aioseo_meta ===");
+        echo "</div>";
     }
     
     /**
@@ -306,8 +339,8 @@ class WP_Comparator_Pages {
      * Définir les meta pour AIOSEO v4+
      */
     private function set_aioseo_v4_meta($page_id, $meta_title, $meta_description) {
-        $this->debug_log("=== DÉBUT set_aioseo_v4_meta ===");
-        $this->debug_log("Tentative stockage v4 - Title: '$meta_title', Desc: '$meta_description'");
+        echo "<div style='background: #f0f8e8; padding: 10px; margin: 5px; border-left: 3px solid #28a745;'>";
+        echo "<h5>💾 STOCKAGE AIOSEO V4+</h5>";
         
         // Récupérer les settings existants
         $settings = get_post_meta($page_id, '_aioseo_posts_settings', true);
@@ -317,7 +350,8 @@ class WP_Comparator_Pages {
             $settings = array();
         }
         
-        $this->debug_log("Settings existants: " . print_r($settings, true));
+        echo "<p><strong>Settings existants:</strong></p>";
+        echo "<pre>" . print_r($settings, true) . "</pre>";
         
         // Ajouter nos meta
         if (!empty($meta_title)) {
@@ -328,37 +362,40 @@ class WP_Comparator_Pages {
             $settings['description'] = $meta_description;
         }
         
-        $this->debug_log("Settings après modification: " . print_r($settings, true));
+        echo "<p><strong>Settings après modification:</strong></p>";
+        echo "<pre>" . print_r($settings, true) . "</pre>";
         
         // Sauvegarder
         $result = update_post_meta($page_id, '_aioseo_posts_settings', $settings);
         
-        $this->debug_log("Résultat update_post_meta: " . ($result ? 'SUCCESS' : 'FAILED'));
+        echo "<p><strong>Résultat update_post_meta:</strong> " . ($result ? '✅ SUCCESS' : '❌ FAILED') . "</p>";
         
         // Vérification immédiate
         $verification = get_post_meta($page_id, '_aioseo_posts_settings', true);
-        $this->debug_log("Vérification immédiate: " . print_r($verification, true));
+        echo "<p><strong>Vérification immédiate:</strong></p>";
+        echo "<pre>" . print_r($verification, true) . "</pre>";
         
-        $this->debug_log("=== FIN set_aioseo_v4_meta ===");
+        echo "</div>";
     }
     
     /**
      * Définir les meta pour AIOSEO v3
      */
     private function set_aioseo_v3_meta($page_id, $meta_title, $meta_description) {
-        $this->debug_log("=== DÉBUT set_aioseo_v3_meta ===");
+        echo "<div style='background: #f8f0e8; padding: 10px; margin: 5px; border-left: 3px solid #ff8c00;'>";
+        echo "<h5>💾 STOCKAGE AIOSEO V3</h5>";
         
         if (!empty($meta_title)) {
             $result1 = update_post_meta($page_id, '_aioseop_title', $meta_title);
-            $this->debug_log("AIOSEO v3 title stocké: '$meta_title' - Résultat: " . ($result1 ? 'SUCCESS' : 'FAILED'));
+            echo "<p>Title stocké: '$meta_title' - Résultat: " . ($result1 ? '✅ SUCCESS' : '❌ FAILED') . "</p>";
         }
         
         if (!empty($meta_description)) {
             $result2 = update_post_meta($page_id, '_aioseop_description', $meta_description);
-            $this->debug_log("AIOSEO v3 description stockée: '$meta_description' - Résultat: " . ($result2 ? 'SUCCESS' : 'FAILED'));
+            echo "<p>Description stockée: '$meta_description' - Résultat: " . ($result2 ? '✅ SUCCESS' : '✅ FAILED') . "</p>";
         }
         
-        $this->debug_log("=== FIN set_aioseo_v3_meta ===");
+        echo "</div>";
     }
     
     /**

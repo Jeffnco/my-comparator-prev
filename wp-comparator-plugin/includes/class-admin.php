@@ -459,6 +459,9 @@ class WP_Comparator_Admin {
         $slug = !empty($_POST['slug']) ? $this->generate_slug($_POST['slug']) : $this->generate_slug($name);
         $description = sanitize_textarea_field($_POST['description']);
         $intro_text = sanitize_textarea_field($_POST['intro_text']);
+        $custom_title = sanitize_textarea_field($_POST['custom_title']);
+        $meta_title = sanitize_textarea_field($_POST['meta_title']);
+        $meta_description = sanitize_textarea_field($_POST['meta_description']);
         
         // Vérifier que le slug est unique
         $existing_slug = $wpdb->get_var($wpdb->prepare(
@@ -483,7 +486,10 @@ class WP_Comparator_Admin {
             'name' => $name,
             'slug' => $slug,
             'description' => $description,
-            'intro_text' => $intro_text
+            'intro_text' => $intro_text,
+            'custom_title' => $custom_title,
+            'meta_title' => $meta_title,
+            'meta_description' => $meta_description
         ));
         
         if ($result) {
@@ -503,6 +509,9 @@ class WP_Comparator_Admin {
         $slug = !empty($_POST['slug']) ? $this->generate_slug($_POST['slug']) : $this->generate_slug($name);
         $description = sanitize_textarea_field($_POST['description']);
         $intro_text = sanitize_textarea_field($_POST['intro_text']);
+        $custom_title = sanitize_textarea_field($_POST['custom_title']);
+        $meta_title = sanitize_textarea_field($_POST['meta_title']);
+        $meta_description = sanitize_textarea_field($_POST['meta_description']);
         
         // Vérifier que le slug est unique (sauf pour ce type)
         $existing_slug = $wpdb->get_var($wpdb->prepare(
@@ -529,10 +538,13 @@ class WP_Comparator_Admin {
                 'name' => $name,
                 'slug' => $slug,
                 'description' => $description,
-                'intro_text' => $intro_text
+                'intro_text' => $intro_text,
+                'custom_title' => $custom_title,
+                'meta_title' => $meta_title,
+                'meta_description' => $meta_description
             ),
             array('id' => $type_id),
-            array('%s', '%s', '%s', '%s'),
+            array('%s', '%s', '%s', '%s', '%s', '%s', '%s'),
             array('%d')
         );
         

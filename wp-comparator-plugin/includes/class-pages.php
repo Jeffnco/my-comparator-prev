@@ -109,7 +109,7 @@ class WP_Comparator_Pages {
         }
         
         // Générer le titre et le slug de la page
-        $page_title = "Prévoyance : Comparaison du contrat {$item1->name} et {$item2->name}";
+        $page_title = $this->generate_page_title($type, $item1, $item2);
         $page_slug = "comparez-{$type_slug}-{$item1_slug}-et-{$item2_slug}";
         
         $this->debug_log("Slug de page généré: $page_slug");
@@ -188,6 +188,39 @@ class WP_Comparator_Pages {
         );
         
         return str_replace(array_keys($replacements), array_values($replacements), $intro_text);
+    }
+    
+    /**
+     * Générer le titre de la page de comparaison
+     */
+    private function generate_page_title($type, $item1, $item2) {
+        // Si un titre personnalisé est défini, l'utiliser
+        if (!empty($type->custom_title)) {
+            return $this->replace_title_variables($type->custom_title, $item1, $item2);
+        }
+        
+        // Sinon, utiliser le titre par défaut
+        return "Prévoyance : Comparaison du contrat {$item1->name} et {$item2->name}";
+    }
+    
+    /**
+     * Remplacer les variables dans les titres et meta
+     */
+    private function replace_title_variables($text, $item1, $item2) {
+        $replacements = array(
+            '{contrat1}' => $item1->contrat ?: $item1->name,
+            '{assureur1}' => $item1->assureur ?: 'N/A',
+            '{name1}' => $item1->name,
+            '{version1}' => $item1->version ?: '',
+            '{territorialite1}' => $item1->territorialite ?: '',
+            '{contrat2}' => $item2->contrat ?: $item2->name,
+            '{assureur2}' => $item2->assureur ?: 'N/A',
+            '{name2}' => $item2->name,
+            '{version2}' => $item2->version ?: '',
+            '{territorialite2}' => $item2->territorialite ?: ''
+        );
+        
+        return str_replace(array_keys($replacements), array_values($replacements), $text);
     }
     
     /**

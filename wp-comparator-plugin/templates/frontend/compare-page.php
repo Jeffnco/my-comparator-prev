@@ -1,3 +1,65 @@
+<?php
+// Générer les meta tags personnalisés
+$meta_title = '';
+$meta_description = '';
+
+if (!empty($type->meta_title)) {
+    $meta_title = str_replace(
+        array('{contrat1}', '{assureur1}', '{name1}', '{version1}', '{territorialite1}', 
+              '{contrat2}', '{assureur2}', '{name2}', '{version2}', '{territorialite2}'),
+        array(
+            stripslashes($item1->contrat ?: $item1->name),
+            stripslashes($item1->assureur ?: 'N/A'),
+            stripslashes($item1->name),
+            stripslashes($item1->version ?: ''),
+            stripslashes($item1->territorialite ?: ''),
+            stripslashes($item2->contrat ?: $item2->name),
+            stripslashes($item2->assureur ?: 'N/A'),
+            stripslashes($item2->name),
+            stripslashes($item2->version ?: ''),
+            stripslashes($item2->territorialite ?: '')
+        ),
+        stripslashes($type->meta_title)
+    );
+}
+
+if (!empty($type->meta_description)) {
+    $meta_description = str_replace(
+        array('{contrat1}', '{assureur1}', '{name1}', '{version1}', '{territorialite1}', 
+              '{contrat2}', '{assureur2}', '{name2}', '{version2}', '{territorialite2}'),
+        array(
+            stripslashes($item1->contrat ?: $item1->name),
+            stripslashes($item1->assureur ?: 'N/A'),
+            stripslashes($item1->name),
+            stripslashes($item1->version ?: ''),
+            stripslashes($item1->territorialite ?: ''),
+            stripslashes($item2->contrat ?: $item2->name),
+            stripslashes($item2->assureur ?: 'N/A'),
+            stripslashes($item2->name),
+            stripslashes($item2->version ?: ''),
+            stripslashes($item2->territorialite ?: '')
+        ),
+        stripslashes($type->meta_description)
+    );
+}
+
+// Ajouter les meta tags au head
+if ($meta_title) {
+    add_filter('wp_title', function() use ($meta_title) {
+        return $meta_title;
+    });
+    add_filter('document_title_parts', function() use ($meta_title) {
+        return array('title' => $meta_title);
+    });
+}
+
+if ($meta_description) {
+    add_action('wp_head', function() use ($meta_description) {
+        echo '<meta name="description" content="' . esc_attr($meta_description) . '">' . "\n";
+    });
+}
+?>
+
 <div class="wp-comparator-compare-page">
     <div class="container">
         <?php if (!empty($type->intro_text)): ?>

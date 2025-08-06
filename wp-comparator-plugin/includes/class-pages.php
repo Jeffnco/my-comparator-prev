@@ -188,6 +188,9 @@ class WP_Comparator_Pages {
         if ($page_id && !is_wp_error($page_id)) {
             $this->debug_log("Page créée avec succès - ID: $page_id");
             
+            // Gérer AIOSEO séparément car il utilise un format spécial
+            $this->handle_aioseo_meta($page_id, $meta_title, $meta_description);
+            
             // Debug des meta SEO stockés
             if (!empty($meta_title)) {
                 $this->debug_log("Meta title stocké: $meta_title");
@@ -204,6 +207,97 @@ class WP_Comparator_Pages {
             $this->debug_log("Erreur création page: " . (is_wp_error($page_id) ? $page_id->get_error_message() : 'Erreur inconnue'));
             return array('error' => 'Erreur lors de la création');
         }
+    }
+    
+    /**
+     * Gérer les meta SEO pour AIOSEO (format spécial)
+     */
+    private function handle_aioseo_meta($page_id, $meta_title, $meta_description) {
+        // Vérifier si AIOSEO est actif
+        if (!$this->is_aioseo_active()) {
+            return;
+        }
+        
+        // Détecter la version d'AIOSEO
+        if ($this->is_aioseo_v4_or_higher()) {
+            // AIOSEO v4+ utilise '_aioseo_posts_settings'
+            $this->set_aioseo_v4_meta($page_id, $meta_title, $meta_description);
+        } else {
+            // AIOSEO v3 utilise '_aioseop_*'
+            $this->set_aioseo_v3_meta($page_id, $meta_title, $meta_description);
+        }
+    }
+    
+    /**
+     * Vérifier si AIOSEO est actif
+     */
+    private function is_aioseo_active() {
+        include_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        return (
+            is_plugin_active('all-in-one-seo-pack/all_in_one_seo_pack.php') || // v3
+            is_plugin_active('all-in-one-seo-pack-pro/all_in_one_seo_pack_pro.php') || // v3 Pro
+            is_plugin_active('all-in-one-seo/all-in-one-seo.php') || // v4
+            is_plugin_active('all-in-one-seo-pro/all-in-one-seo-pro.php') // v4 Pro
+        );
+    }
+    
+    /**
+     * Détecter si AIOSEO v4 ou supérieur
+     */
+    private function is_aioseo_v4_or_higher() {
+        // AIOSEO v4+ définit la constante AIOSEO_VERSION
+        if (defined('AIOSEO_VERSION')) {
+            return version_compare(AIOSEO_VERSION, '4.0', '>=');
+        }
+        
+        // Fallback : vérifier le nom du plugin actif
+        include_once(ABSPATH . 'wp-admin/includes/plugin.php');
+        return (
+            is_plugin_active('all-in-one-seo/all-in-one-seo.php') ||
+            is_plugin_active('all-in-one-seo-pro/all-in-one-seo-pro.php')
+        );
+    }
+    
+    /**
+     * Définir les meta pour AIOSEO v4+
+     */
+    private function set_aioseo_v4_meta($page_id, $meta_title, $meta_description) {
+        // Récupérer les settings existants
+        $settings = get_post_meta($page_id, '_aioseo_posts_settings', true);
+        
+        // Si pas de settings existants, créer un tableau vide
+        if (!is_array($settings)) {
+            $settings = array();
+        }
+        
+        // Ajouter nos meta
+        if (!empty($meta_title)) {
+            $settings['title'] = $meta_title;
+        }
+        
+        if (!empty($meta_description)) {
+            $settings['description'] = $meta_description;
+        }
+        
+        // Sauvegarder
+        update_post_meta($page_id, '_aioseo_posts_settings', $settings);
+        
+        $this->debug_log("AIOSEO v4+ meta stockés: " . print_r($settings, true));
+    }
+    
+    /**
+     * Définir les meta pour AIOSEO v3
+     */
+    private function set_aioseo_v3_meta($page_id, $meta_title, $meta_description) {
+        if (!empty($meta_title)) {
+            update_post_meta($page_id, '_aioseop_title', $meta_title);
+        }
+        
+        if (!empty($meta_description)) {
+            update_post_meta($page_id, '_aioseop_description', $meta_description);
+        }
+        
+        $this->debug_log("AIOSEO v3 meta stockés - Title: $meta_title, Description: $meta_description");
     }
     
     /**

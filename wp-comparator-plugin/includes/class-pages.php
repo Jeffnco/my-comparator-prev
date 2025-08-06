@@ -56,13 +56,10 @@ class WP_Comparator_Pages {
      */
     public function handle_comparison_page() {
         if (get_query_var('wp_comparator_compare')) {
-            // Debug pour voir ce qui est reçu
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('WP Comparator - handle_comparison_page called');
-                error_log('Type slug: ' . get_query_var('type_slug'));
-                error_log('Item1 slug: ' . get_query_var('item1_slug'));
-                error_log('Item2 slug: ' . get_query_var('item2_slug'));
-            }
+            $this->debug_log('handle_comparison_page called');
+            $this->debug_log('Type slug: ' . get_query_var('type_slug'));
+            $this->debug_log('Item1 slug: ' . get_query_var('item1_slug'));
+            $this->debug_log('Item2 slug: ' . get_query_var('item2_slug'));
             
             $this->display_comparison_page();
             exit;
@@ -75,9 +72,7 @@ class WP_Comparator_Pages {
     public function create_wordpress_page($type_slug, $item1_slug, $item2_slug) {
         global $wpdb;
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("create_wordpress_page appelée - type: $type_slug, item1: $item1_slug, item2: $item2_slug");
-        }
+        $this->debug_log("create_wordpress_page appelée - type: $type_slug, item1: $item1_slug, item2: $item2_slug");
         
         // Nettoyer les slugs
         $type_slug = sanitize_title($type_slug);
@@ -94,9 +89,7 @@ class WP_Comparator_Pages {
         ));
         
         if (!$type) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Type non trouvé: $type_slug");
-            }
+            $this->debug_log("Type non trouvé: $type_slug");
             return array('error' => 'Type non trouvé');
         }
         
@@ -111,9 +104,7 @@ class WP_Comparator_Pages {
         ));
         
         if (!$item1 || !$item2) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Items non trouvés - item1: " . ($item1 ? 'OK' : 'NON') . ", item2: " . ($item2 ? 'OK' : 'NON'));
-            }
+            $this->debug_log("Items non trouvés - item1: " . ($item1 ? 'OK' : 'NON') . ", item2: " . ($item2 ? 'OK' : 'NON'));
             return array('error' => 'Contrats non trouvés');
         }
         
@@ -121,16 +112,12 @@ class WP_Comparator_Pages {
         $page_title = "Prévoyance : Comparaison du contrat {$item1->name} et {$item2->name}";
         $page_slug = "comparez-{$type_slug}-{$item1_slug}-et-{$item2_slug}";
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Slug de page généré: $page_slug");
-        }
+        $this->debug_log("Slug de page généré: $page_slug");
         
         // Vérifier si la page existe déjà
         $existing_page = get_page_by_path($page_slug);
         if ($existing_page) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Page existante trouvée - ID: {$existing_page->ID}");
-            }
+            $this->debug_log("Page existante trouvée - ID: {$existing_page->ID}");
             return array(
                 'page_id' => $existing_page->ID,
                 'existing' => true
@@ -140,9 +127,7 @@ class WP_Comparator_Pages {
         // Générer le contenu de la page
         $page_content = $this->generate_page_content($type, $item1, $item2);
         
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("Contenu généré: " . substr($page_content, 0, 100) . "...");
-        }
+        $this->debug_log("Contenu généré: " . substr($page_content, 0, 100) . "...");
         
         // Créer la page
         $page_data = array(
@@ -163,17 +148,13 @@ class WP_Comparator_Pages {
         $page_id = wp_insert_post($page_data);
         
         if ($page_id && !is_wp_error($page_id)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Page créée avec succès - ID: $page_id");
-            }
+            $this->debug_log("Page créée avec succès - ID: $page_id");
             return array(
                 'page_id' => $page_id,
                 'existing' => false
             );
         } else {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("Erreur création page: " . (is_wp_error($page_id) ? $page_id->get_error_message() : 'Erreur inconnue'));
-            }
+            $this->debug_log("Erreur création page: " . (is_wp_error($page_id) ? $page_id->get_error_message() : 'Erreur inconnue'));
             return array('error' => 'Erreur lors de la création');
         }
     }
@@ -223,15 +204,11 @@ class WP_Comparator_Pages {
         $item2_slug = sanitize_title($item2_slug);
         
         // Debug
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("WP Comparator - Slugs nettoyés: type=$type_slug, item1=$item1_slug, item2=$item2_slug");
-        }
+        $this->debug_log("Slugs nettoyés: type=$type_slug, item1=$item1_slug, item2=$item2_slug");
         
         // Vérifier que tous les paramètres sont présents
         if (empty($type_slug) || empty($item1_slug) || empty($item2_slug)) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log('WP Comparator - Paramètres manquants');
-            }
+            $this->debug_log('Paramètres manquants');
             wp_die('Paramètres de comparaison manquants');
         }
         
@@ -242,9 +219,7 @@ class WP_Comparator_Pages {
         $table_items = $wpdb->prefix . 'comparator_items';
         
         // Debug de la requête
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            error_log("WP Comparator - Recherche du type avec slug: $type_slug");
-        }
+        $this->debug_log("Recherche du type avec slug: $type_slug");
         
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
@@ -252,12 +227,10 @@ class WP_Comparator_Pages {
         ));
         
         if (!$type) {
-            if (defined('WP_DEBUG') && WP_DEBUG) {
-                error_log("WP Comparator - Type non trouvé pour slug: $type_slug");
-                // Lister tous les types disponibles
-                $all_types = $wpdb->get_results("SELECT id, name, slug FROM $table_types");
-                error_log("WP Comparator - Types disponibles: " . print_r($all_types, true));
-            }
+            $this->debug_log("Type non trouvé pour slug: $type_slug");
+            // Lister tous les types disponibles
+            $all_types = $wpdb->get_results("SELECT id, name, slug FROM $table_types");
+            $this->debug_log("Types disponibles: " . print_r($all_types, true));
             wp_die('Type de comparateur non trouvé');
         }
         
@@ -351,5 +324,14 @@ class WP_Comparator_Pages {
         }
         
         return $data;
+    }
+    
+    /**
+     * Fonction de debug centralisée
+     */
+    private function debug_log($message) {
+        if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+            error_log('WP Comparator - ' . $message);
+        }
     }
 }

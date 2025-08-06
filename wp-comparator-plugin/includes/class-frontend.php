@@ -127,6 +127,14 @@ class WP_Comparator_Frontend {
             'items' => ''
         ), $atts);
         
+        // DEBUG: Afficher les informations de debug
+        echo '<div style="background: #ff0000; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace;">';
+        echo '<strong>🔍 DEBUG SHORTCODE COMPARE:</strong><br>';
+        echo 'Type recherché: "' . $atts['type'] . '"<br>';
+        echo 'Items: "' . $atts['items'] . '"<br>';
+        echo 'Préfixe BDD: "' . $GLOBALS['wpdb']->prefix . '"<br>';
+        echo '</div>';
+        
         // DEBUG: Afficher le slug recherché
         echo '<div style="background: red; color: white; padding: 10px; margin: 10px 0; border-radius: 5px;">';
         echo '<strong>DEBUG:</strong><br>';
@@ -136,6 +144,7 @@ class WP_Comparator_Frontend {
         echo '</div>';
         
         if (empty($atts['type']) || empty($atts['items'])) {
+            echo '<div style="background: #ff6600; color: white; padding: 10px; margin: 10px 0;">ERREUR: Paramètres manquants</div>';
             return '<p>Erreur: Paramètres manquants pour la comparaison.</p>';
         }
         
@@ -144,11 +153,30 @@ class WP_Comparator_Frontend {
         $table_types = $wpdb->prefix . 'comparator_types';
         $table_items = $wpdb->prefix . 'comparator_items';
         
+        // DEBUG: Afficher la requête SQL
+        echo '<div style="background: #0066cc; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace;">';
+        echo '<strong>🔍 DEBUG SQL:</strong><br>';
+        echo 'Table utilisée: "' . $table_types . '"<br>';
+        $sql_debug = $wpdb->prepare("SELECT * FROM $table_types WHERE slug = %s", $atts['type']);
+        echo 'Requête SQL: ' . $sql_debug . '<br>';
+        echo '</div>';
+        
         // Récupérer le type
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
         ));
+        
+        // DEBUG: Afficher le résultat
+        echo '<div style="background: #009900; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace;">';
+        echo '<strong>🔍 DEBUG RÉSULTAT:</strong><br>';
+        if ($type) {
+            echo 'Type trouvé: ID=' . $type->id . ', Name="' . $type->name . '", Slug="' . $type->slug . '"<br>';
+        } else {
+            echo 'AUCUN TYPE TROUVÉ !<br>';
+            echo 'Erreur SQL: ' . $wpdb->last_error . '<br>';
+        }
+        echo '</div>';
         
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';

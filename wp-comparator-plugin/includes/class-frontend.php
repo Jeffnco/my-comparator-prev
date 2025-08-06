@@ -20,10 +20,19 @@ class WP_Comparator_Frontend {
             $compare_items = sanitize_text_field($_GET['compare']);
             $type_slug = sanitize_text_field($_GET['type']);
             
+            // Debug
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log("WP Comparator - Redirection demandée: type=$type_slug, items=$compare_items");
+            }
+            
             $item_slugs = explode(',', $compare_items);
             if (count($item_slugs) === 2) {
                 $item1_slug = trim($item_slugs[0]);
                 $item2_slug = trim($item_slugs[1]);
+                
+                // Nettoyer les slugs
+                $item1_slug = sanitize_title($item1_slug);
+                $item2_slug = sanitize_title($item2_slug);
                 
                 // Créer ou récupérer la page de comparaison
                 $pages_class = new WP_Comparator_Pages();
@@ -31,6 +40,9 @@ class WP_Comparator_Frontend {
                 
                 if ($result && isset($result['page_id'])) {
                     $page_url = get_permalink($result['page_id']);
+                    if (defined('WP_DEBUG') && WP_DEBUG) {
+                        error_log("WP Comparator - Redirection vers: $page_url");
+                    }
                     wp_redirect($page_url, 301);
                     exit;
                 }

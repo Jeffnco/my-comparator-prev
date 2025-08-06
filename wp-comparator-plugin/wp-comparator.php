@@ -81,6 +81,12 @@ class WP_Comparator {
             $database->create_tables();
         }
         
+        // Ajouter les règles de réécriture
+        if (class_exists('WP_Comparator_Pages')) {
+            $pages = new WP_Comparator_Pages();
+            $pages->add_rewrite_rules();
+        }
+        
         // Flush rewrite rules
         flush_rewrite_rules();
         

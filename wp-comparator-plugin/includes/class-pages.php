@@ -130,6 +130,45 @@ class WP_Comparator_Pages {
         // Générer le contenu de la page
         $page_content = $this->generate_page_content($type, $item1, $item2);
         
+        // Générer les meta SEO personnalisés
+        $meta_title = '';
+        $meta_description = '';
+        
+        if (!empty($type->meta_title)) {
+            $meta_title = $this->replace_title_variables($type->meta_title, $item1, $item2);
+        }
+        
+        if (!empty($type->meta_description)) {
+            $meta_description = $this->replace_title_variables($type->meta_description, $item1, $item2);
+        }
+        
+        // Préparer les meta_input avec les meta SEO
+        $meta_input = array(
+            '_wp_comparator_page' => 1,
+            '_wp_comparator_type' => $type_slug,
+            '_wp_comparator_item1' => $item1_slug,
+            '_wp_comparator_item2' => $item2_slug
+        );
+        
+        // Ajouter les meta SEO pour chaque plugin si définis
+        if (!empty($meta_title)) {
+            // Yoast SEO
+            $meta_input['_yoast_wpseo_title'] = $meta_title;
+            // All in One SEO
+            $meta_input['_aioseo_title'] = $meta_title;
+            // RankMath
+            $meta_input['rank_math_title'] = $meta_title;
+        }
+        
+        if (!empty($meta_description)) {
+            // Yoast SEO
+            $meta_input['_yoast_wpseo_metadesc'] = $meta_description;
+            // All in One SEO
+            $meta_input['_aioseo_description'] = $meta_description;
+            // RankMath
+            $meta_input['rank_math_description'] = $meta_description;
+        }
+        
         // Générer un excerpt propre pour les meta descriptions automatiques
         $this->debug_log("Contenu généré: " . substr($page_content, 0, 100) . "...");
         
@@ -141,18 +180,22 @@ class WP_Comparator_Pages {
             'post_status' => 'publish',
             'post_type' => 'page',
             'post_author' => 1,
-            'meta_input' => array(
-                '_wp_comparator_page' => 1,
-                '_wp_comparator_type' => $type_slug,
-                '_wp_comparator_item1' => $item1_slug,
-                '_wp_comparator_item2' => $item2_slug
-            )
+            'meta_input' => $meta_input
         );
         
         $page_id = wp_insert_post($page_data);
         
         if ($page_id && !is_wp_error($page_id)) {
             $this->debug_log("Page créée avec succès - ID: $page_id");
+            
+            // Debug des meta SEO stockés
+            if (!empty($meta_title)) {
+                $this->debug_log("Meta title stocké: $meta_title");
+            }
+            if (!empty($meta_description)) {
+                $this->debug_log("Meta description stockée: $meta_description");
+            }
+            
             return array(
                 'page_id' => $page_id,
                 'existing' => false

@@ -4,12 +4,38 @@ class WP_Comparator_Frontend {
     
     public function __construct() {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_scripts'));
-        add_shortcode('wp_comparator', array($this, 'shortcode_comparator'));
+        add_shortcode('wp_comparator', array($this, 'shortcode_comparator_grid'));
         add_shortcode('wp_comparator_compare', array($this, 'shortcode_comparator_compare'));
         add_shortcode('wp_comparator_single', array($this, 'shortcode_comparator_single'));
         
-        // Gérer les paramètres d'URL pour les pages de comparaison et single
-        add_action('template_redirect', array($this, 'handle_url_params'));
+        // Gérer les paramètres de comparaison dans l'URL
+        add_action('template_redirect', array($this, 'handle_comparison_redirect'));
+    }
+    
+    /**
+     * Gérer la redirection vers les pages de comparaison
+     */
+    public function handle_comparison_redirect() {
+        if (isset($_GET['compare']) && isset($_GET['type'])) {
+            $compare_items = sanitize_text_field($_GET['compare']);
+            $type_slug = sanitize_text_field($_GET['type']);
+            
+            $item_slugs = explode(',', $compare_items);
+            if (count($item_slugs) === 2) {
+                $item1_slug = trim($item_slugs[0]);
+                $item2_slug = trim($item_slugs[1]);
+                
+                // Créer ou récupérer la page de comparaison
+                $pages_class = new WP_Comparator_Pages();
+                $result = $pages_class->create_wordpress_page($type_slug, $item1_slug, $item2_slug);
+                
+                if ($result && isset($result['page_id'])) {
+                    $page_url = get_permalink($result['page_id']);
+                    wp_redirect($page_url, 301);
+                    exit;
+                }
+            }
+        }
     }
     
     public function enqueue_frontend_scripts() {
@@ -19,107 +45,85 @@ class WP_Comparator_Frontend {
         wp_localize_script('wp-comparator-frontend', 'wpComparatorFrontend', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('wp_comparator_frontend_nonce'),
-            'maxSelection' => get_option('wp_comparator_max_comparison', 2),
-            'currentTypeSlug' => isset($_GET['type']) ? sanitize_text_field($_GET['type']) : ''
+            'homeUrl' => home_url('/'),
+            'currentTypeSlug' => isset($atts['type']) ? $atts['type'] : ''
         ));
     }
     
     /**
-     * Gérer les paramètres d'URL pour afficher les bonnes vues
+     * Shortcode pour afficher la grille de sélection avec vignettes
+     * Usage: [wp_comparator type="assurance-prevoyance"]
      */
-    public function handle_url_params() {
-        // Gérer le paramètre ?compare=item1,item2&type=type_slug
-        if (isset($_GET['compare']) && isset($_GET['type'])) {
-            $compare_items = sanitize_text_field($_GET['compare']);
-            $type_slug = sanitize_text_field($_GET['type']);
-            
-            $items = explode(',', $compare_items);
-            if (count($items) === 2) {
-                // Rediriger vers une page de comparaison ou afficher directement
-                $this->display_comparison_page($type_slug, $items[0], $items[1]);
-                exit;
-            }
-        }
-        
-        // Gérer le paramètre ?single=item_slug&type=type_slug
-        if (isset($_GET['single']) && isset($_GET['type'])) {
-            $item_slug = sanitize_text_field($_GET['single']);
-            $type_slug = sanitize_text_field($_GET['type']);
-            
-            $this->display_single_page($type_slug, $item_slug);
-            exit;
-        }
-    }
-    
-    /**
-     * Afficher la page de comparaison directement
-     */
-    private function display_comparison_page($type_slug, $item1_slug, $item2_slug) {
-        // Utiliser le shortcode de comparaison
-        echo do_shortcode("[wp_comparator_compare type=\"$type_slug\" items=\"$item1_slug,$item2_slug\"]");
-    }
-    
-    /**
-     * Afficher la page single directement
-     */
-    private function display_single_page($type_slug, $item_slug) {
-        // Utiliser le shortcode single
-        echo do_shortcode("[wp_comparator_single type=\"$type_slug\" item=\"$item_slug\"]");
-    }
-    
-    /**
-     * Shortcode principal pour afficher la grille de sélection
-     */
-    public function shortcode_comparator($atts) {
+    public function shortcode_comparator_grid($atts) {
         $atts = shortcode_atts(array(
             'type' => '',
-            'columns' => '3',
-            'show_filters' => 'true'
+            'show_filters' => 'true',
+            'columns' => '3'
         ), $atts);
         
         if (empty($atts['type'])) {
-            return '<p>Erreur: Type de comparateur non spécifié.</p>';
+            return '<p>Erreur: Le paramètre "type" est requis.</p>';
         }
         
         global $wpdb;
         
-        $table_types = $wpdb->prefix . 'comparator_types';
-        $table_items = $wpdb->prefix . 'comparator_items';
-        $table_fields = $wpdb->prefix . 'comparator_fields';
-        
         // Récupérer le type
+        $table_types = $wpdb->prefix . 'comparator_types';
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
         ));
+        
+        // Debug info - À SUPPRIMER APRÈS DIAGNOSTIC
+        error_log("=== DEBUG WP COMPARATOR ===");
+        error_log("Table name: " . $table_types);
+        error_log("Slug recherché: " . $atts['type']);
+        error_log("Dernière erreur SQL: " . $wpdb->last_error);
+        error_log("Nombre de types en BDD: " . $wpdb->get_var("SELECT COUNT(*) FROM $table_types"));
+        error_log("Type trouvé: " . ($type ? 'OUI' : 'NON'));
+        if ($type) {
+            error_log("Type ID: " . $type->id . ", Name: " . $type->name . ", Slug: " . $type->slug);
+        }
+        error_log("=== FIN DEBUG ===");
         
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';
         }
         
         // Récupérer les éléments actifs
+        $table_items = $wpdb->prefix . 'comparator_items';
         $items = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $table_items WHERE type_id = %d AND is_active = 1 ORDER BY sort_order, name",
             $type->id
         ));
         
-        // Récupérer les champs filtrables
+        // Récupérer les champs filtrables si les filtres sont activés
         $filterable_fields = array();
         if ($atts['show_filters'] === 'true') {
+            $table_fields = $wpdb->prefix . 'comparator_fields';
+            
             $filterable_fields = $wpdb->get_results($wpdb->prepare(
-                "SELECT * FROM $table_fields WHERE type_id = %d AND is_filterable = 1 ORDER BY sort_order",
+                "SELECT * FROM $table_fields 
+                WHERE type_id = %d AND is_filterable = 1 AND field_type = 'description'
+                ORDER BY sort_order",
                 $type->id
             ));
         }
         
-        // Générer le HTML
         ob_start();
         include WP_COMPARATOR_PLUGIN_DIR . 'templates/frontend/grid.php';
+        
+        // Passer le type_slug au JavaScript
+        wp_add_inline_script('wp-comparator-frontend', 
+            'wpComparatorFrontend.currentTypeSlug = "' . esc_js($atts['type']) . '";'
+        );
+        
         return ob_get_clean();
     }
     
     /**
      * Shortcode pour comparer deux éléments
+     * Usage: [wp_comparator_compare type="assurance-prevoyance" items="aviva-senseo,april-prevoyance"]
      */
     public function shortcode_comparator_compare($atts) {
         $atts = shortcode_atts(array(
@@ -128,15 +132,18 @@ class WP_Comparator_Frontend {
         ), $atts);
         
         if (empty($atts['type']) || empty($atts['items'])) {
-            return '<p>Erreur: Paramètres manquants pour la comparaison.</p>';
+            return '<p>Erreur: Les paramètres "type" et "items" sont requis.</p>';
+        }
+        
+        $item_slugs = explode(',', $atts['items']);
+        if (count($item_slugs) !== 2) {
+            return '<p>Erreur: Vous devez spécifier exactement 2 éléments à comparer.</p>';
         }
         
         global $wpdb;
         
-        $table_types = $wpdb->prefix . 'comparator_types';
-        $table_items = $wpdb->prefix . 'comparator_items';
-        
         // Récupérer le type
+        $table_types = $wpdb->prefix . 'comparator_types';
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
@@ -146,31 +153,25 @@ class WP_Comparator_Frontend {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';
         }
         
-        // Parser les éléments à comparer
-        $item_slugs = explode(',', $atts['items']);
-        if (count($item_slugs) !== 2) {
-            return '<p>Erreur: Exactement 2 éléments requis pour la comparaison.</p>';
-        }
-        
         // Récupérer les éléments
+        $table_items = $wpdb->prefix . 'comparator_items';
         $item1 = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
-            trim($item_slugs[0]), $type->id
+            "SELECT * FROM $table_items WHERE type_id = %d AND slug = %s AND is_active = 1",
+            $type->id, trim($item_slugs[0])
         ));
         
         $item2 = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
-            trim($item_slugs[1]), $type->id
+            "SELECT * FROM $table_items WHERE type_id = %d AND slug = %s AND is_active = 1",
+            $type->id, trim($item_slugs[1])
         ));
         
         if (!$item1 || !$item2) {
             return '<p>Erreur: Un ou plusieurs éléments non trouvés.</p>';
         }
         
-        // Récupérer les données de comparaison
+        // Récupérer la structure des champs
         $comparison_data = $this->get_comparison_data($type->id, array($item1->id, $item2->id));
         
-        // Générer le HTML
         ob_start();
         include WP_COMPARATOR_PLUGIN_DIR . 'templates/frontend/compare-page.php';
         return ob_get_clean();
@@ -178,6 +179,7 @@ class WP_Comparator_Frontend {
     
     /**
      * Shortcode pour afficher un seul élément
+     * Usage: [wp_comparator_single type="assurance-prevoyance" item="aviva-senseo"]
      */
     public function shortcode_comparator_single($atts) {
         $atts = shortcode_atts(array(
@@ -186,15 +188,13 @@ class WP_Comparator_Frontend {
         ), $atts);
         
         if (empty($atts['type']) || empty($atts['item'])) {
-            return '<p>Erreur: Paramètres manquants.</p>';
+            return '<p>Erreur: Les paramètres "type" et "item" sont requis.</p>';
         }
         
         global $wpdb;
         
-        $table_types = $wpdb->prefix . 'comparator_types';
-        $table_items = $wpdb->prefix . 'comparator_items';
-        
         // Récupérer le type
+        $table_types = $wpdb->prefix . 'comparator_types';
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
@@ -205,9 +205,10 @@ class WP_Comparator_Frontend {
         }
         
         // Récupérer l'élément
+        $table_items = $wpdb->prefix . 'comparator_items';
         $item = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
-            $atts['item'], $type->id
+            "SELECT * FROM $table_items WHERE type_id = %d AND slug = %s AND is_active = 1",
+            $type->id, $atts['item']
         ));
         
         if (!$item) {
@@ -215,27 +216,27 @@ class WP_Comparator_Frontend {
         }
         
         // Récupérer les données de l'élément
-        $item_data = $this->get_single_item_data($type->id, $item->id);
+        $item_data = $this->get_comparison_data($type->id, array($item->id));
         
-        // Générer le HTML
         ob_start();
         include WP_COMPARATOR_PLUGIN_DIR . 'templates/frontend/single.php';
         return ob_get_clean();
     }
     
     /**
-     * Récupérer les données structurées pour la comparaison
+     * Récupère les données structurées pour la comparaison
      */
     private function get_comparison_data($type_id, $item_ids) {
         global $wpdb;
         
+        $table_categories = $wpdb->prefix . 'comparator_fields';
         $table_fields = $wpdb->prefix . 'comparator_fields';
         $table_values = $wpdb->prefix . 'comparator_values';
         $table_field_descriptions = $wpdb->prefix . 'comparator_field_descriptions';
         
-        // Récupérer les catégories
+        // Récupérer les catégories avec toutes leurs données
         $categories = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table_fields WHERE type_id = %d AND field_type = 'category' ORDER BY sort_order",
+            "SELECT * FROM $table_categories WHERE type_id = %d AND field_type = 'category' ORDER BY sort_order",
             $type_id
         ));
         
@@ -275,65 +276,6 @@ class WP_Comparator_Frontend {
                     $field_data['values'][$item_id] = $value;
                     $field_data['long_descriptions'][$item_id] = $long_description;
                 }
-                
-                $category_data['fields'][] = $field_data;
-            }
-            
-            // N'ajouter la catégorie que si elle a des champs
-            if (!empty($category_data['fields'])) {
-                $data[] = $category_data;
-            }
-        }
-        
-        return $data;
-    }
-    
-    /**
-     * Récupérer les données pour un seul élément
-     */
-    private function get_single_item_data($type_id, $item_id) {
-        global $wpdb;
-        
-        $table_fields = $wpdb->prefix . 'comparator_fields';
-        $table_values = $wpdb->prefix . 'comparator_values';
-        $table_field_descriptions = $wpdb->prefix . 'comparator_field_descriptions';
-        
-        // Récupérer les catégories
-        $categories = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $table_fields WHERE type_id = %d AND field_type = 'category' ORDER BY sort_order",
-            $type_id
-        ));
-        
-        $data = array();
-        
-        foreach ($categories as $category) {
-            // Récupérer les champs description de cette catégorie
-            $fields = $wpdb->get_results($wpdb->prepare(
-                "SELECT * FROM $table_fields WHERE parent_category_id = %d AND field_type = 'description' ORDER BY sort_order",
-                $category->id
-            ));
-            
-            $category_data = array(
-                'category' => $category,
-                'fields' => array()
-            );
-            
-            foreach ($fields as $field) {
-                $value = $wpdb->get_var($wpdb->prepare(
-                    "SELECT value FROM $table_values WHERE item_id = %d AND field_id = %d",
-                    $item_id, $field->id
-                ));
-                
-                $long_description = $wpdb->get_var($wpdb->prepare(
-                    "SELECT long_description FROM $table_field_descriptions WHERE item_id = %d AND field_id = %d",
-                    $item_id, $field->id
-                ));
-                
-                $field_data = array(
-                    'field' => $field,
-                    'values' => array($item_id => $value),
-                    'long_descriptions' => array($item_id => $long_description)
-                );
                 
                 $category_data['fields'][] = $field_data;
             }

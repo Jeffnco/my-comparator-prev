@@ -74,6 +74,18 @@ class WP_Comparator_Frontend {
             $atts['type']
         ));
         
+        // Debug info - À SUPPRIMER APRÈS DIAGNOSTIC
+        error_log("=== DEBUG WP COMPARATOR ===");
+        error_log("Table name: " . $table_types);
+        error_log("Slug recherché: " . $atts['type']);
+        error_log("Dernière erreur SQL: " . $wpdb->last_error);
+        error_log("Nombre de types en BDD: " . $wpdb->get_var("SELECT COUNT(*) FROM $table_types"));
+        error_log("Type trouvé: " . ($type ? 'OUI' : 'NON'));
+        if ($type) {
+            error_log("Type ID: " . $type->id . ", Name: " . $type->name . ", Slug: " . $type->slug);
+        }
+        error_log("=== FIN DEBUG ===");
+        
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';
         }

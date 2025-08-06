@@ -1,0 +1,233 @@
+/* WP Comparator Admin Styles */
+
+.wp-comparator-admin-content {
+    margin-top: 20px;
+}
+
+.admin-section {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.admin-section h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.admin-section h3 {
+    margin-top: 25px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Dashboard widgets */
+.dashboard-widgets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.dashboard-widget {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.dashboard-widget h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    flex: 1;
+    min-width: 80px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+    color: #0073aa;
+    line-height: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.guide-steps ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.guide-steps li {
+    margin-bottom: 8px;
+}
+
+.shortcodes-list code {
+    display: block;
+    background: #f1f1f1;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, monospace;
+}
+
+.shortcodes-list p {
+    margin-bottom: 15px;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Form styles */
+.form-table th {
+    width: 200px;
+    vertical-align: top;
+    padding-top: 15px;
+}
+
+.form-table td {
+    padding-top: 10px;
+}
+
+.button-small {
+    margin-right: 5px;
+    font-size: 12px;
+    height: auto;
+    padding: 4px 8px;
+}
+
+/* Tables */
+.wp-list-table img {
+    border-radius: 3px;
+}
+
+.wp-list-table .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Color inputs */
+input[type="color"] {
+    width: 50px;
+    height: 30px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-widgets {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats {
+        justify-content: space-around;
+    }
+    
+    .stat-item {
+        min-width: 60px;
+    }
+    
+    .stat-number {
+        font-size: 24px;
+    }
+    
+    .form-table th,
+    .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .form-table th {
+        border-bottom: none;
+        padding-bottom: 5px;
+    }
+}
+
+/* Notices */
+.notice {
+    margin: 15px 0;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner {
+    float: none;
+    margin: 0 5px;
+}
+
+/* Custom buttons */
+.button-primary {
+    background: #0073aa;
+    border-color: #0073aa;
+}
+
+.button-primary:hover {
+    background: #005a87;
+    border-color: #005a87;
+}
+
+.button-secondary {
+    background: #f7f7f7;
+    border-color: #cccccc;
+    color: #555;
+}
+
+.button-secondary:hover {
+    background: #fafafa;
+    border-color: #999;
+}
+
+/* Drag and drop */
+.sortable {
+    cursor: move;
+}
+
+.sortable:hover {
+    background-color: #f9f9f9;
+}
+
+.ui-sortable-helper {
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Media uploader integration */
+.media-button {
+    vertical-align: top;
+    margin-left: 5px;
+}

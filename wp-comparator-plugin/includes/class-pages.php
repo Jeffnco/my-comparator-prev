@@ -127,12 +127,21 @@ class WP_Comparator_Pages {
         // Générer le contenu de la page
         $page_content = $this->generate_page_content($type, $item1, $item2);
         
+        // Générer un excerpt propre pour les meta descriptions automatiques
+        $page_excerpt = '';
+        if (!empty($type->intro_text)) {
+            $page_excerpt = $this->replace_intro_variables($type->intro_text, $item1, $item2);
+            // Limiter à 160 caractères pour les meta descriptions
+            $page_excerpt = wp_trim_words($page_excerpt, 25, '...');
+        }
+        
         $this->debug_log("Contenu généré: " . substr($page_content, 0, 100) . "...");
         
         // Créer la page
         $page_data = array(
             'post_title' => $page_title,
             'post_content' => $page_content,
+            'post_excerpt' => $page_excerpt,
             'post_name' => $page_slug,
             'post_status' => 'publish',
             'post_type' => 'page',
@@ -170,9 +179,11 @@ class WP_Comparator_Pages {
         $intro_text = '';
         if (!empty($type->intro_text)) {
             $intro_text = $this->replace_intro_variables($type->intro_text, $item1, $item2);
-            $intro_text = "<div class=\"comparison-intro\">" . wpautop($intro_text) . "</div>\n\n";
+            // Mettre le texte d'intro en premier pour les meta descriptions automatiques
+            $intro_text = wpautop($intro_text) . "\n\n";
         }
         
+        // Mettre l'intro en premier, puis le shortcode (pour éviter le shortcode dans les meta auto)
         return $intro_text . $shortcode;
     }
     

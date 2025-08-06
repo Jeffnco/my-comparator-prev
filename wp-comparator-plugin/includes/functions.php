@@ -228,4 +228,119 @@ function wp_comparator_cleanup_data() {
     // Supprimer les options
     delete_option('wp_comparator_version');
     delete_option('wp_comparator_settings');
+    
+    wp_cache_flush();
+}
+
+/**
+ * Définir les meta tags SEO pour les pages de comparaison
+ * Compatible avec Yoast, AIOSEO, RankMath et WordPress natif
+ */
+function wp_comparator_set_seo_meta($type, $item1, $item2) {
+    // Générer les meta tags personnalisés
+    $meta_title = '';
+    $meta_description = '';
+    
+    if (!empty($type->meta_title)) {
+        $meta_title = str_replace(
+            array('{contrat1}', '{assureur1}', '{name1}', '{version1}', '{territorialite1}', 
+                  '{contrat2}', '{assureur2}', '{name2}', '{version2}', '{territorialite2}'),
+            array(
+                stripslashes($item1->contrat ?: $item1->name),
+                stripslashes($item1->assureur ?: 'N/A'),
+                stripslashes($item1->name),
+                stripslashes($item1->version ?: ''),
+                stripslashes($item1->territorialite ?: ''),
+                stripslashes($item2->contrat ?: $item2->name),
+                stripslashes($item2->assureur ?: 'N/A'),
+                stripslashes($item2->name),
+                stripslashes($item2->version ?: ''),
+                stripslashes($item2->territorialite ?: '')
+            ),
+            stripslashes($type->meta_title)
+        );
+    }
+    
+    if (!empty($type->meta_description)) {
+        $meta_description = str_replace(
+            array('{contrat1}', '{assureur1}', '{name1}', '{version1}', '{territorialite1}', 
+                  '{contrat2}', '{assureur2}', '{name2}', '{version2}', '{territorialite2}'),
+            array(
+                stripslashes($item1->contrat ?: $item1->name),
+                stripslashes($item1->assureur ?: 'N/A'),
+                stripslashes($item1->name),
+                stripslashes($item1->version ?: ''),
+                stripslashes($item1->territorialite ?: ''),
+                stripslashes($item2->contrat ?: $item2->name),
+                stripslashes($item2->assureur ?: 'N/A'),
+                stripslashes($item2->name),
+                stripslashes($item2->version ?: ''),
+                stripslashes($item2->territorialite ?: '')
+            ),
+            stripslashes($type->meta_description)
+        );
+    }
+    
+    // Appliquer les meta tags selon le plugin SEO actif
+    if ($meta_title) {
+        // Yoast SEO
+        add_filter('wpseo_title', function() use ($meta_title) {
+            return $meta_title;
+        }, 999);
+        
+        // All in One SEO
+        add_filter('aioseo_title', function() use ($meta_title) {
+            return $meta_title;
+        }, 999);
+        
+        // RankMath
+        add_filter('rank_math/frontend/title', function() use ($meta_title) {
+            return $meta_title;
+        }, 999);
+        
+        // WordPress natif (fallback)
+        add_filter('document_title_parts', function() use ($meta_title) {
+            return array('title' => $meta_title);
+        }, 999);
+        
+        add_filter('wp_title', function() use ($meta_title) {
+            return $meta_title;
+        }, 999);
+    }
+    
+    if ($meta_description) {
+        // Yoast SEO
+        add_filter('wpseo_metadesc', function() use ($meta_description) {
+            return $meta_description;
+        }, 999);
+        
+        // All in One SEO
+        add_filter('aioseo_description', function() use ($meta_description) {
+            return $meta_description;
+        }, 999);
+        
+        // RankMath
+        add_filter('rank_math/frontend/description', function() use ($meta_description) {
+            return $meta_description;
+        }, 999);
+        
+        // WordPress natif (fallback)
+        add_action('wp_head', function() use ($meta_description) {
+            // Vérifier qu'aucun plugin SEO n'a déjà ajouté une meta description
+            if (!wp_comparator_has_seo_plugin()) {
+                echo '<meta name="description" content="' . esc_attr($meta_description) . '">' . "\n";
+            }
+        }, 1);
+    }
+}
+
+/**
+ * Vérifier si un plugin SEO est actif
+ */
+function wp_comparator_has_seo_plugin() {
+    return (
+        defined('WPSEO_VERSION') || // Yoast
+        defined('AIOSEO_VERSION') || // All in One SEO
+        defined('RANK_MATH_VERSION') // RankMath
+    );
 }

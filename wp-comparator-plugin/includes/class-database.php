@@ -18,6 +18,7 @@ class WP_Comparator_Database {
             name varchar(255) NOT NULL,
             slug varchar(255) NOT NULL,
             description text,
+            url_prefix varchar(255) NULL,
             intro_text text,
             custom_title text,
             meta_title text,
@@ -161,6 +162,9 @@ class WP_Comparator_Database {
         // Vérifier que toutes les tables sont bien créées
         $this->verify_tables_exist();
         
+        // Vérifier et ajouter les nouvelles colonnes si nécessaire
+        $this->add_missing_columns();
+        
         // Marquer que les tables sont créées
         update_option('wp_comparator_tables_created', '1');
         
@@ -195,6 +199,26 @@ class WP_Comparator_Database {
             
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
             dbDelta($sql_field_descriptions);
+        }
+    }
+    
+    /**
+     * Ajouter les colonnes manquantes aux tables existantes
+     */
+    public function add_missing_columns() {
+        global $wpdb;
+        
+        $table_types = $wpdb->prefix . 'comparator_types';
+        
+        // Vérifier si la colonne url_prefix existe
+        $column_exists = $wpdb->get_results($wpdb->prepare(
+            "SHOW COLUMNS FROM $table_types LIKE %s",
+            'url_prefix'
+        ));
+        
+        // Ajouter la colonne si elle n'existe pas
+        if (empty($column_exists)) {
+            $wpdb->query("ALTER TABLE $table_types ADD COLUMN url_prefix VARCHAR(255) NULL AFTER description");
         }
     }
     

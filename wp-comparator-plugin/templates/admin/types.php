@@ -78,6 +78,19 @@
                     </tr>
                     <tr>
                         <th scope="row">
+                            <label for="url_prefix">Préfixe URL complet</label>
+                        </th>
+                        <td>
+                            <input type="text" id="url_prefix" name="url_prefix" class="regular-text" value="<?php echo $edit_type ? esc_attr($edit_type->url_prefix) : ''; ?>" placeholder="comparez-les-prevoyances">
+                            <p class="description">
+                                Préfixe complet pour les URLs de comparaison.<br>
+                                Ex: "comparez-les-prevoyances" donnera "comparez-les-prevoyances-item1-et-item2"<br>
+                                Si vide, utilisera "comparez-<?php echo $edit_type ? esc_attr($edit_type->slug) : 'slug-du-type'; ?>"
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
                             <label for="intro_text">Texte d'introduction pour la comparaison</label>
                         </th>
                         <td>

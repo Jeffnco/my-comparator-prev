@@ -723,6 +723,7 @@ class WP_Comparator_Admin {
         global $wpdb;
         $table_values = $wpdb->prefix . 'comparator_values';
         $table_filter_values = $wpdb->prefix . 'comparator_filter_values';
+        $table_item_filters = $wpdb->prefix . 'comparator_item_filters';
         $table_field_descriptions = $wpdb->prefix . 'comparator_field_descriptions';
         
         $item_id = intval($_POST['item_id']);
@@ -738,47 +739,43 @@ class WP_Comparator_Admin {
             exit;
         }
         
-        // Sauvegarder les valeurs des champs
+        // Sauvegarder les valeurs de filtres des champs filtrables
         foreach ($_POST as $key => $value) {
             if (strpos($key, 'field_') === 0 && strpos($key, '_filter') !== false) {
-                // Traiter les valeurs de filtre
+                // Traiter les valeurs de filtre dans la nouvelle table
                 $field_id = intval(str_replace(array('field_', '_filter'), '', $key));
                 $filter_value = sanitize_text_field($value);
                 
-                $existing = $wpdb->get_var($wpdb->prepare(
-                    "SELECT id FROM $table_values WHERE item_id = %d AND field_id = %d",
+                $existing_filter = $wpdb->get_var($wpdb->prepare(
+                    "SELECT id FROM $table_item_filters WHERE item_id = %d AND field_id = %d",
                     $item_id, $field_id
                 ));
                 
-                if ($existing) {
+                if ($existing_filter) {
                     $wpdb->update(
-                        $table_values,
-                        array('value' => $filter_value),
+                        $table_item_filters,
+                        array('filter_value' => $filter_value),
                         array('item_id' => $item_id, 'field_id' => $field_id)
                     );
                 } else {
                     $wpdb->insert(
-                        $table_values,
+                        $table_item_filters,
                         array(
                             'item_id' => $item_id,
                             'field_id' => $field_id,
-                            'value' => $filter_value
+                            'filter_value' => $filter_value
                         )
                     );
                 }
-            } elseif (strpos($key, 'field_') === 0 && strpos($key, '_filter') === false) {
-                // Traiter les valeurs normales des champs (descriptions courtes)
+            }
+        }
+        
+        // Sauvegarder les descriptions courtes des champs
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'field_') === 0 && strpos($key, '_filter') === false) {
+                // Traiter les descriptions courtes des champs
                 $field_id = intval(str_replace('field_', '', $key));
                 $value = sanitize_textarea_field($value);
-                
-                // Pour les champs filtrables, ne pas écraser la valeur du filtre
-                // Vérifier si ce champ a une valeur de filtre
-                $has_filter_value = isset($_POST['field_' . $field_id . '_filter']) && !empty($_POST['field_' . $field_id . '_filter']);
-                
-                if ($has_filter_value) {
-                    // Ne pas sauvegarder la description courte si on a une valeur de filtre
-                    continue;
-                }
                 
                 $existing = $wpdb->get_var($wpdb->prepare(
                     "SELECT id FROM $table_values WHERE item_id = %d AND field_id = %d",

@@ -117,6 +117,7 @@ class WP_Comparator {
         // Supprimer TOUTES les tables du plugin
         $tables = array(
             $wpdb->prefix . 'comparator_field_descriptions',
+            $wpdb->prefix . 'comparator_item_filters',
             $wpdb->prefix . 'comparator_filter_values',
             $wpdb->prefix . 'comparator_values',
             $wpdb->prefix . 'comparator_items',

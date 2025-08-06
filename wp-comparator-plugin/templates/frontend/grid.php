@@ -47,14 +47,9 @@
                      <?php 
                      // Ajouter les attributs data pour le filtrage
                      if (!empty($filterable_fields)) {
-                         global $wpdb;
-                         $table_values = $wpdb->prefix . 'comparator_values';
                          foreach ($filterable_fields as $field) {
-                             $field_value = $wpdb->get_var($wpdb->prepare(
-                                 "SELECT value FROM $table_values WHERE item_id = %d AND field_id = %d",
-                                 $item->id, $field->id
-                             ));
-                             echo 'data-filter-' . $field->id . '="' . esc_attr($field_value) . '" ';
+                             $filter_value = isset($item->filter_values[$field->id]) ? $item->filter_values[$field->id] : '';
+                             echo 'data-filter-' . $field->id . '="' . esc_attr($filter_value) . '" ';
                          }
                      }
                      ?>>

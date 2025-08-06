@@ -112,6 +112,21 @@ class WP_Comparator_Database {
             KEY filter_id (filter_id)
         ) $charset_collate;";
         
+        // Table des valeurs de filtres par champ pour chaque contrat
+        $table_item_filters = $wpdb->prefix . 'comparator_item_filters';
+        $sql_item_filters = "CREATE TABLE $table_item_filters (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            item_id int(11) NOT NULL,
+            field_id int(11) NOT NULL,
+            filter_value varchar(255),
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY item_field_filter (item_id, field_id),
+            KEY item_id (item_id),
+            KEY field_id (field_id)
+        ) $charset_collate;";
+        
         // Table des descriptions longues par champ et par contrat
         $table_field_descriptions = $wpdb->prefix . 'comparator_field_descriptions';
         $sql_field_descriptions = "CREATE TABLE $table_field_descriptions (
@@ -136,6 +151,7 @@ class WP_Comparator_Database {
         dbDelta($sql_items);
         dbDelta($sql_values);
         dbDelta($sql_filter_values);
+        dbDelta($sql_item_filters);
         dbDelta($sql_field_descriptions);
         
         // Vérifier que toutes les tables sont bien créées

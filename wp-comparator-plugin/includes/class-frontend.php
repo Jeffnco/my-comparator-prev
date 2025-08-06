@@ -92,6 +92,7 @@ class WP_Comparator_Frontend {
         
         // Récupérer les éléments actifs
         $table_items = $wpdb->prefix . 'comparator_items';
+        $table_item_filters = $wpdb->prefix . 'comparator_item_filters';
         $items = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM $table_items WHERE type_id = %d AND is_active = 1 ORDER BY sort_order, name",
             $type->id
@@ -108,6 +109,20 @@ class WP_Comparator_Frontend {
                 ORDER BY sort_order",
                 $type->id
             ));
+        }
+        
+        // Enrichir les items avec leurs valeurs de filtres pour le JavaScript
+        foreach ($items as $item) {
+            $item->filter_values = array();
+            if (!empty($filterable_fields)) {
+                foreach ($filterable_fields as $field) {
+                    $filter_value = $wpdb->get_var($wpdb->prepare(
+                        "SELECT filter_value FROM $table_item_filters WHERE item_id = %d AND field_id = %d",
+                        $item->id, $field->id
+                    ));
+                    $item->filter_values[$field->id] = $filter_value;
+                }
+            }
         }
         
         ob_start();

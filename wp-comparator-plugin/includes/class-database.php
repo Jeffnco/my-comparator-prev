@@ -152,6 +152,7 @@ class WP_Comparator_Database {
         dbDelta($sql_values);
         dbDelta($sql_filter_values);
         dbDelta($sql_item_filters);
+        dbDelta($sql_item_filters);
         dbDelta($sql_field_descriptions);
         
         // Vérifier que toutes les tables sont bien créées

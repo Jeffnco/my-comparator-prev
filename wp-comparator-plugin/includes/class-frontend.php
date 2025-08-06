@@ -221,9 +221,6 @@ class WP_Comparator_Frontend {
     /**
      * Shortcode pour afficher un seul élément
      */
-    public function shortcode_comparator_single($atts) {
-        $atts = shortcode_atts(array(
-            'type' => '',
             'item' => ''
         ), $atts);
         
@@ -233,18 +230,11 @@ class WP_Comparator_Frontend {
         
         global $wpdb;
         
-        $table_types = $wpdb->prefix . 'comparator_types';
-        $table_items = $wpdb->prefix . 'comparator_items';
-        
         // Récupérer le type
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
         ));
-        
-        // Debug console - résultat
-        echo '<script>console.log("DEBUG TYPE RESULT:", ' . json_encode($type) . ');</script>';
-        echo '<script>console.log("DEBUG WPDB ERROR:", "' . $wpdb->last_error . '");</script>';
         
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';

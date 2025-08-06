@@ -136,11 +136,19 @@ class WP_Comparator_Frontend {
         $table_types = $wpdb->prefix . 'comparator_types';
         $table_items = $wpdb->prefix . 'comparator_items';
         
+        // DEBUG SIMPLE
+        $debug_info = "Table: " . $table_types . " | Slug: " . $atts['type'];
+        
         // Récupérer le type
         $type = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_types WHERE slug = %s",
             $atts['type']
         ));
+        
+        // DEBUG RÉSULTAT
+        if (!$type) {
+            return '<div style="background:red;color:white;padding:10px;margin:10px;">' . $debug_info . ' | RÉSULTAT: NULL | ERREUR SQL: ' . $wpdb->last_error . '</div>';
+        }
         
         if (!$type) {
             return '<p>Erreur: Type de comparateur non trouvé.</p>';

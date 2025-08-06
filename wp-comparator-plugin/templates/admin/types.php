@@ -93,7 +93,7 @@
                             <label for="custom_title">Titre personnalisé de la page de comparaison</label>
                         </th>
                         <td>
-                            <textarea id="custom_title" name="custom_title" rows="2" class="large-text" placeholder="Ex: Comparaison {contrat1} vs {contrat2} - {assureur1} et {assureur2}"><?php echo $edit_type ? esc_textarea($edit_type->custom_title) : ''; ?></textarea>
+                            <textarea id="custom_title" name="custom_title" rows="2" class="large-text" placeholder="Ex: Comparaison {contrat1} vs {contrat2} - {assureur1} et {assureur2}"><?php echo ($edit_type && isset($edit_type->custom_title)) ? esc_textarea($edit_type->custom_title) : ''; ?></textarea>
                             <p class="description">
                                 Variables disponibles : {contrat1}, {contrat2}, {assureur1}, {assureur2}, {name1}, {name2}, {version1}, {version2}<br>
                                 Laissez vide pour utiliser le titre par défaut.
@@ -105,7 +105,7 @@
                             <label for="meta_title">Meta Title (SEO)</label>
                         </th>
                         <td>
-                            <textarea id="meta_title" name="meta_title" rows="2" class="large-text" placeholder="Ex: {contrat1} vs {contrat2} : Comparaison détaillée | Votre Site"><?php echo $edit_type ? esc_textarea($edit_type->meta_title) : ''; ?></textarea>
+                            <textarea id="meta_title" name="meta_title" rows="2" class="large-text" placeholder="Ex: {contrat1} vs {contrat2} : Comparaison détaillée | Votre Site"><?php echo ($edit_type && isset($edit_type->meta_title)) ? esc_textarea($edit_type->meta_title) : ''; ?></textarea>
                             <p class="description">
                                 Balise &lt;title&gt; pour le SEO. Variables disponibles : {contrat1}, {contrat2}, {assureur1}, {assureur2}, etc.<br>
                                 Laissez vide pour utiliser le titre de la page.
@@ -117,7 +117,7 @@
                             <label for="meta_description">Meta Description (SEO)</label>
                         </th>
                         <td>
-                            <textarea id="meta_description" name="meta_description" rows="3" class="large-text" placeholder="Ex: Comparez en détail les contrats {contrat1} de {assureur1} et {contrat2} de {assureur2}. Analyse complète des garanties et conditions."><?php echo $edit_type ? esc_textarea($edit_type->meta_description) : ''; ?></textarea>
+                            <textarea id="meta_description" name="meta_description" rows="3" class="large-text" placeholder="Ex: Comparez en détail les contrats {contrat1} de {assureur1} et {contrat2} de {assureur2}. Analyse complète des garanties et conditions."><?php echo ($edit_type && isset($edit_type->meta_description)) ? esc_textarea($edit_type->meta_description) : ''; ?></textarea>
                             <p class="description">
                                 Description pour les moteurs de recherche (155-160 caractères recommandés).<br>
                                 Variables disponibles : {contrat1}, {contrat2}, {assureur1}, {assureur2}, etc.

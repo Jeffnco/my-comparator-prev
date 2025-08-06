@@ -234,7 +234,7 @@ function wp_comparator_cleanup_data() {
 
 /**
  * Définir les meta tags SEO pour les pages de comparaison
- * Compatible avec Yoast, AIOSEO, RankMath et WordPress natif
+ * Compatible avec Yoast, RankMath et WordPress natif
  */
 function wp_comparator_set_seo_meta($type, $item1, $item2) {
     // Générer les meta tags personnalisés
@@ -288,11 +288,6 @@ function wp_comparator_set_seo_meta($type, $item1, $item2) {
             return $meta_title;
         }, 999);
         
-        // All in One SEO
-        add_filter('aioseo_title', function() use ($meta_title) {
-            return $meta_title;
-        }, 999);
-        
         // RankMath
         add_filter('rank_math/frontend/title', function() use ($meta_title) {
             return $meta_title;
@@ -311,11 +306,6 @@ function wp_comparator_set_seo_meta($type, $item1, $item2) {
     if ($meta_description) {
         // Yoast SEO
         add_filter('wpseo_metadesc', function() use ($meta_description) {
-            return $meta_description;
-        }, 999);
-        
-        // All in One SEO
-        add_filter('aioseo_description', function() use ($meta_description) {
             return $meta_description;
         }, 999);
         
@@ -340,7 +330,6 @@ function wp_comparator_set_seo_meta($type, $item1, $item2) {
 function wp_comparator_has_seo_plugin() {
     return (
         defined('WPSEO_VERSION') || // Yoast
-        defined('AIOSEO_VERSION') || // All in One SEO
         defined('RANK_MATH_VERSION') // RankMath
     );
 }

@@ -293,6 +293,7 @@ class WP_Comparator_Admin {
         $table_values = $wpdb->prefix . 'comparator_values';
         $table_filters = $wpdb->prefix . 'comparator_filters';
         $table_filter_values = $wpdb->prefix . 'comparator_filter_values';
+        $table_item_filters = $wpdb->prefix . 'comparator_item_filters';
         $table_field_descriptions = $wpdb->prefix . 'comparator_field_descriptions';
         
         // Récupérer l'élément

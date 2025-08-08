@@ -250,12 +250,18 @@ class WP_Comparator_Ajax {
         $item1_slug = sanitize_text_field($_POST['item1_slug']);
         $item2_slug = sanitize_text_field($_POST['item2_slug']);
         
+        // SOLUTION ANTI-DUPLICATE : Tri alphabétique
+        $item_slugs = [$item1_slug, $item2_slug];
+        sort($item_slugs);
+        $canonical_item1_slug = $item_slugs[0];
+        $canonical_item2_slug = $item_slugs[1];
+        
         // Debug - log des données reçues
-        error_log("AJAX create_comparison_page - type: $type_slug, item1: $item1_slug, item2: $item2_slug");
+        error_log("AJAX create_comparison_page - type: $type_slug, canonical: $canonical_item1_slug, $canonical_item2_slug");
         
         // Créer une nouvelle page WordPress via la classe Pages
         $pages_class = new WP_Comparator_Pages();
-        $result = $pages_class->create_wordpress_page($type_slug, $item1_slug, $item2_slug);
+        $result = $pages_class->create_wordpress_page($type_slug, $canonical_item1_slug, $canonical_item2_slug);
         
         if ($result && isset($result['page_id'])) {
             $page_url = get_permalink($result['page_id']);

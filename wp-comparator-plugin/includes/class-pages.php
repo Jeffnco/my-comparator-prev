@@ -80,6 +80,12 @@ class WP_Comparator_Pages {
         $item1_slug = sanitize_title($item1_slug);
         $item2_slug = sanitize_title($item2_slug);
         
+        // SOLUTION ANTI-DUPLICATE : Tri alphabétique des slugs
+        $item_slugs = [$item1_slug, $item2_slug];
+        sort($item_slugs);
+        $canonical_item1_slug = $item_slugs[0];
+        $canonical_item2_slug = $item_slugs[1];
+        
         // Récupérer les données des contrats
         $table_types = $wpdb->prefix . 'comparator_types';
         $table_items = $wpdb->prefix . 'comparator_items';
@@ -93,6 +99,18 @@ class WP_Comparator_Pages {
             return array('error' => 'Type non trouvé');
         }
         
+        // Récupérer les items dans l'ordre CANONIQUE (alphabétique)
+        $canonical_item1 = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
+            $canonical_item1_slug, $type->id
+        ));
+        
+        $canonical_item2 = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
+            $canonical_item2_slug, $type->id
+        ));
+        
+        // Récupérer aussi les items dans l'ordre ORIGINAL (pour l'affichage)
         $item1 = $wpdb->get_row($wpdb->prepare(
             "SELECT * FROM $table_items WHERE slug = %s AND type_id = %d",
             $item1_slug, $type->id
@@ -103,14 +121,14 @@ class WP_Comparator_Pages {
             $item2_slug, $type->id
         ));
         
-        if (!$item1 || !$item2) {
+        if (!$canonical_item1 || !$canonical_item2 || !$item1 || !$item2) {
             return array('error' => 'Contrats non trouvés');
         }
         
-        // Générer le titre et le slug de la page
-        $page_title = $this->generate_page_title($type, $item1, $item2);
+        // Générer le titre et le slug de la page (ORDRE CANONIQUE)
+        $page_title = $this->generate_page_title($type, $canonical_item1, $canonical_item2);
         $url_prefix = !empty($type->url_prefix) ? $type->url_prefix : "comparez-{$type_slug}";
-        $page_slug = "{$url_prefix}-{$item1_slug}-et-{$item2_slug}";
+        $page_slug = "{$url_prefix}-{$canonical_item1_slug}-et-{$canonical_item2_slug}";
         
         // Vérifier si la page existe déjà
         $existing_page = get_page_by_path($page_slug);
@@ -121,27 +139,28 @@ class WP_Comparator_Pages {
             );
         }
         
-        // Générer le contenu de la page
-        $page_content = $this->generate_page_content($type, $item1, $item2);
+        // Générer le contenu de la page (ORDRE CANONIQUE)
+        $page_content = $this->generate_page_content($type, $canonical_item1, $canonical_item2);
         
         // Générer les meta SEO personnalisés
         $meta_title = '';
         $meta_description = '';
         
         if (!empty($type->meta_title)) {
-            $meta_title = $this->replace_title_variables($type->meta_title, $item1, $item2);
+            $meta_title = $this->replace_title_variables($type->meta_title, $canonical_item1, $canonical_item2);
         }
         
         if (!empty($type->meta_description)) {
-            $meta_description = $this->replace_title_variables($type->meta_description, $item1, $item2);
+            $meta_description = $this->replace_title_variables($type->meta_description, $canonical_item1, $canonical_item2);
         }
         
         // Préparer les meta_input avec les meta SEO
         $meta_input = array(
             '_wp_comparator_page' => 1,
             '_wp_comparator_type' => $type_slug,
-            '_wp_comparator_item1' => $item1_slug,
-            '_wp_comparator_item2' => $item2_slug
+            '_wp_comparator_item1' => $canonical_item1_slug,
+            '_wp_comparator_item2' => $canonical_item2_slug,
+            '_wp_comparator_original_order' => $item1_slug . ',' . $item2_slug // Sauvegarder l'ordre original
         );
         
         // Ajouter les meta SEO pour Yoast et RankMath si définis
@@ -185,9 +204,9 @@ class WP_Comparator_Pages {
     /**
      * Générer le contenu de la page de comparaison
      */
-    private function generate_page_content($type, $item1, $item2) {
+    private function generate_page_content($type, $canonical_item1, $canonical_item2) {
         // Générer le shortcode de comparaison
-        $shortcode = "[wp_comparator_compare type=\"{$type->slug}\" items=\"{$item1->slug},{$item2->slug}\"]";
+        $shortcode = "[wp_comparator_compare type=\"{$type->slug}\" items=\"{$canonical_item1->slug},{$canonical_item2->slug}\"]";
         
         return $shortcode;
     }

@@ -1,16 +1,36 @@
 <?php
 // Les meta tags SEO sont maintenant gérés dans class-pages.php AVANT l'affichage
 
+// Récupérer l'ordre original depuis les meta de la page si disponible
+$original_order = get_post_meta(get_the_ID(), '_wp_comparator_original_order', true);
+$display_item1 = $item1;
+$display_item2 = $item2;
+
+// Si on a l'ordre original et qu'il diffère de l'ordre canonique, réorganiser pour l'affichage
+if ($original_order) {
+    $original_slugs = explode(',', $original_order);
+    if (count($original_slugs) === 2) {
+        $original_item1_slug = trim($original_slugs[0]);
+        $original_item2_slug = trim($original_slugs[1]);
+        
+        // Si l'ordre original est différent de l'ordre canonique, inverser pour l'affichage
+        if ($original_item1_slug === $item2->slug && $original_item2_slug === $item1->slug) {
+            $display_item1 = $item2;
+            $display_item2 = $item1;
+        }
+    }
+}
+
 // Générer le texte d'introduction si défini
 $intro_text = '';
 if (!empty($type->intro_text)) {
     $intro_text = str_replace(
         array('{contrat1}', '{assureur1}', '{contrat2}', '{assureur2}'),
         array(
-            stripslashes($item1->contrat ?: $item1->name),
-            stripslashes($item1->assureur ?: 'N/A'),
-            stripslashes($item2->contrat ?: $item2->name),
-            stripslashes($item2->assureur ?: 'N/A')
+            stripslashes($display_item1->contrat ?: $display_item1->name),
+            stripslashes($display_item1->assureur ?: 'N/A'),
+            stripslashes($display_item2->contrat ?: $display_item2->name),
+            stripslashes($display_item2->assureur ?: 'N/A')
         ),
         stripslashes($type->intro_text)
     );
@@ -31,34 +51,34 @@ if (!empty($type->intro_text)) {
         <div class="contracts-overview">
             <div class="contract-card">
                 <div class="contract-header">
-                    <?php if ($item1->logo_url): ?>
-                        <img src="<?php echo esc_url($item1->logo_url); ?>" alt="<?php echo esc_attr($item1->name); ?>" class="contract-logo">
+                    <?php if ($display_item1->logo_url): ?>
+                        <img src="<?php echo esc_url($display_item1->logo_url); ?>" alt="<?php echo esc_attr($display_item1->name); ?>" class="contract-logo">
                     <?php endif; ?>
-                    <h2><?php echo esc_html($item1->name); ?></h2>
+                    <h2><?php echo esc_html($display_item1->name); ?></h2>
                 </div>
                 <div class="contract-info">
-                    <?php if ($item1->contrat): ?>
-                        <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($item1->contrat)); ?></p>
+                    <?php if ($display_item1->contrat): ?>
+                        <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($display_item1->contrat)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item1->description): ?>
+                    <?php if ($display_item1->description): ?>
                         <div class="contract-description">
                             <strong>Description :</strong>
-                            <p><?php echo wp_kses_post(nl2br(stripslashes($item1->description))); ?></p>
+                            <p><?php echo wp_kses_post(nl2br(stripslashes($display_item1->description))); ?></p>
                         </div>
                     <?php endif; ?>
-                    <?php if ($item1->assureur): ?>
-                        <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($item1->assureur)); ?></p>
+                    <?php if ($display_item1->assureur): ?>
+                        <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($display_item1->assureur)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item1->version): ?>
-                        <p><strong>Version :</strong> <?php echo esc_html(stripslashes($item1->version)); ?></p>
+                    <?php if ($display_item1->version): ?>
+                        <p><strong>Version :</strong> <?php echo esc_html(stripslashes($display_item1->version)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item1->territorialite): ?>
-                        <p><strong>Territorialité :</strong> <?php echo esc_html(stripslashes($item1->territorialite)); ?></p>
+                    <?php if ($display_item1->territorialite): ?>
+                        <p><strong>Territorialité :</strong> <?php echo esc_html(stripslashes($display_item1->territorialite)); ?></p>
                     <?php endif; ?>
                 </div>
-                <?php if ($item1->document_url): ?>
+                <?php if ($display_item1->document_url): ?>
                     <div class="contract-actions">
-                        <a href="<?php echo esc_url($item1->document_url); ?>" target="_blank" class="btn-document">
+                        <a href="<?php echo esc_url($display_item1->document_url); ?>" target="_blank" class="btn-document">
                             <span class="dashicons dashicons-media-document"></span>
                             Télécharger le document
                         </a>
@@ -72,34 +92,34 @@ if (!empty($type->intro_text)) {
             
             <div class="contract-card">
                 <div class="contract-header">
-                    <?php if ($item2->logo_url): ?>
-                        <img src="<?php echo esc_url($item2->logo_url); ?>" alt="<?php echo esc_attr($item2->name); ?>" class="contract-logo">
+                    <?php if ($display_item2->logo_url): ?>
+                        <img src="<?php echo esc_url($display_item2->logo_url); ?>" alt="<?php echo esc_attr($display_item2->name); ?>" class="contract-logo">
                     <?php endif; ?>
-                    <h2><?php echo esc_html($item2->name); ?></h2>
+                    <h2><?php echo esc_html($display_item2->name); ?></h2>
                 </div>
                 <div class="contract-info">
-                    <?php if ($item2->contrat): ?>
-                        <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($item2->contrat)); ?></p>
+                    <?php if ($display_item2->contrat): ?>
+                        <p><strong>Contrat :</strong> <?php echo esc_html(stripslashes($display_item2->contrat)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item2->description): ?>
+                    <?php if ($display_item2->description): ?>
                         <div class="contract-description">
                             <strong>Description :</strong>
-                            <p><?php echo wp_kses_post(nl2br(stripslashes($item2->description))); ?></p>
+                            <p><?php echo wp_kses_post(nl2br(stripslashes($display_item2->description))); ?></p>
                         </div>
                     <?php endif; ?>
-                    <?php if ($item2->assureur): ?>
-                        <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($item2->assureur)); ?></p>
+                    <?php if ($display_item2->assureur): ?>
+                        <p><strong>Assureur :</strong> <?php echo esc_html(stripslashes($display_item2->assureur)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item2->version): ?>
-                        <p><strong>Version :</strong> <?php echo esc_html(stripslashes($item2->version)); ?></p>
+                    <?php if ($display_item2->version): ?>
+                        <p><strong>Version :</strong> <?php echo esc_html(stripslashes($display_item2->version)); ?></p>
                     <?php endif; ?>
-                    <?php if ($item2->territorialite): ?>
-                        <p><strong>Territorialité :</strong> <?php echo esc_html(stripslashes($item2->territorialite)); ?></p>
+                    <?php if ($display_item2->territorialite): ?>
+                        <p><strong>Territorialité :</strong> <?php echo esc_html(stripslashes($display_item2->territorialite)); ?></p>
                     <?php endif; ?>
                 </div>
-                <?php if ($item2->document_url): ?>
+                <?php if ($display_item2->document_url): ?>
                     <div class="contract-actions">
-                        <a href="<?php echo esc_url($item2->document_url); ?>" target="_blank" class="btn-document">
+                        <a href="<?php echo esc_url($display_item2->document_url); ?>" target="_blank" class="btn-document">
                             <span class="dashicons dashicons-media-document"></span>
                             Télécharger le document
                         </a>
@@ -132,17 +152,17 @@ if (!empty($type->intro_text)) {
                             <div class="comparison-table">
                                 <div class="table-header">
                                     <div class="field-column">Critère</div>
-                                    <div class="item-column"><?php echo esc_html($item1->name); ?></div>
-                                    <div class="item-column"><?php echo esc_html($item2->name); ?></div>
+                                    <div class="item-column"><?php echo esc_html($display_item1->name); ?></div>
+                                    <div class="item-column"><?php echo esc_html($display_item2->name); ?></div>
                                 </div>
                                 
                                 <?php foreach ($fields as $field_data): ?>
                                     <?php 
                                     $field = $field_data['field']; 
-                                    $value1 = isset($field_data['values'][$item1->id]) ? $field_data['values'][$item1->id] : '';
-                                    $value2 = isset($field_data['values'][$item2->id]) ? $field_data['values'][$item2->id] : '';
-                                    $long_desc1 = isset($field_data['long_descriptions'][$item1->id]) ? $field_data['long_descriptions'][$item1->id] : '';
-                                    $long_desc2 = isset($field_data['long_descriptions'][$item2->id]) ? $field_data['long_descriptions'][$item2->id] : '';
+                                    $value1 = isset($field_data['values'][$display_item1->id]) ? $field_data['values'][$display_item1->id] : '';
+                                    $value2 = isset($field_data['values'][$display_item2->id]) ? $field_data['values'][$display_item2->id] : '';
+                                    $long_desc1 = isset($field_data['long_descriptions'][$display_item1->id]) ? $field_data['long_descriptions'][$display_item1->id] : '';
+                                    $long_desc2 = isset($field_data['long_descriptions'][$display_item2->id]) ? $field_data['long_descriptions'][$display_item2->id] : '';
                                     ?>
                                     
                                     <div class="table-row">
@@ -215,11 +235,11 @@ if (!empty($type->intro_text)) {
             </a>
             
             <div class="individual-links">
-                <a href="?single=<?php echo esc_attr($item1->slug); ?>&type=<?php echo esc_attr($type->slug); ?>" class="btn-single">
-                    Voir <?php echo esc_html($item1->name); ?> en détail
+                <a href="?single=<?php echo esc_attr($display_item1->slug); ?>&type=<?php echo esc_attr($type->slug); ?>" class="btn-single">
+                    Voir <?php echo esc_html($display_item1->name); ?> en détail
                 </a>
-                <a href="?single=<?php echo esc_attr($item2->slug); ?>&type=<?php echo esc_attr($type->slug); ?>" class="btn-single">
-                    Voir <?php echo esc_html($item2->name); ?> en détail
+                <a href="?single=<?php echo esc_attr($display_item2->slug); ?>&type=<?php echo esc_attr($type->slug); ?>" class="btn-single">
+                    Voir <?php echo esc_html($display_item2->name); ?> en détail
                 </a>
             </div>
         </div>

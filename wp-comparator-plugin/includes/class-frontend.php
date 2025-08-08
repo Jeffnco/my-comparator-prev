@@ -34,9 +34,15 @@ class WP_Comparator_Frontend {
                 $item1_slug = sanitize_title($item1_slug);
                 $item2_slug = sanitize_title($item2_slug);
                 
+                // SOLUTION ANTI-DUPLICATE : Toujours rediriger vers l'ordre alphabétique
+                $sorted_slugs = [$item1_slug, $item2_slug];
+                sort($sorted_slugs);
+                $canonical_item1_slug = $sorted_slugs[0];
+                $canonical_item2_slug = $sorted_slugs[1];
+                
                 // Créer ou récupérer la page de comparaison
                 $pages_class = new WP_Comparator_Pages();
-                $result = $pages_class->create_wordpress_page($type_slug, $item1_slug, $item2_slug);
+                $result = $pages_class->create_wordpress_page($type_slug, $canonical_item1_slug, $canonical_item2_slug);
                 
                 if ($result && isset($result['page_id'])) {
                     $page_url = get_permalink($result['page_id']);
